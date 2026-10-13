@@ -1,14 +1,15 @@
 # Kisero.org
 
-A small, responsive static landing page for Kisero. The current page is an intentionally simple launch page; its copy can be replaced when the site's purpose and content are ready.
+A responsive sailing log for KISERO, a Beneteau First 27 SE sailing from Pula, Croatia. The site includes boat status, season summaries, a trip list, and detailed trip pages.
 
 ## Files
 
-- `index.html` — page content and metadata
-- `styles.css` — responsive visual styling
+- `index.html` — boat status and sailing log
+- `trip.html` — detailed trip page
+- `styles.css` — legacy responsive styling retained for reuse
 - `favicon.svg` — browser icon
 - `amplify.yml` — buildless AWS Amplify Hosting configuration
-- `site-deploy.zip` — the same public site files, packaged for an Amplify manual deployment
+- `site-deploy.zip` — `index.html`, `trip.html`, `styles.css`, and `favicon.svg`, packaged for an Amplify manual deployment
 
 ## Publish with AWS Amplify Hosting
 

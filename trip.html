@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kisero — trip detail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&amp;family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:inherit}
+</style>
+</head>
+<body>
+<div style="font-family: Arial, sans-serif; color: #1E2433; background: #FFFFFF; min-height: 100vh">
+
+
+  <section style="background: #111111; color: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 32px 24px 48px; display: flex; flex-direction: column; gap: 20px">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+        <a href="index.html" style="display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; font-size: 14px; font-weight: 500; color: #C4C4C4">← Sailing log</a>
+        <a href="index.html" style="text-decoration: none; color: #FFFFFF; font-size: 20px; font-weight: 700; font-style: italic; letter-spacing: 0.02em">KISERO</a>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <h1 style="margin: 0; font-size: 44px; line-height: 1.1; font-weight: 700; letter-spacing: -0.02em">Pula → Brijuni → Pula</h1>
+          <p style="margin: 0; font-size: 16px; color: #C4C4C4">Saturday 4 October 2026 · 09:10 – 14:50 · Skipper + 2 crew</p>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+          <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.25); font-size: 13px">NW · Maestral</span>
+          <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.25); font-size: 13px">Day sail</span>
+          <a href="#" style="display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; text-decoration: none; color: #FFFFFF; font-size: 13px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>
+            GPX
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main style="max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; display: flex; flex-direction: column; gap: 32px">
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px">
+      <div style="border: 1px solid #E4E8EE; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 13px; color: #6B7280">Distance</span><span style="font-size: 26px; font-weight: 600">24.6 nm</span></div>
+      <div style="border: 1px solid #E4E8EE; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 13px; color: #6B7280">Duration</span><span style="font-size: 26px; font-weight: 600">5 h 40 m</span></div>
+      <div style="border: 1px solid #E4E8EE; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 13px; color: #6B7280">Avg / max SOG</span><span style="font-size: 26px; font-weight: 600">4.3 / 7.8 kn</span></div>
+      <div style="border: 1px solid #E4E8EE; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 13px; color: #6B7280">Avg / max TWS</span><span style="font-size: 26px; font-weight: 600">12 / 19 kn</span></div>
+      <div style="border: 1px solid #E4E8EE; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 13px; color: #6B7280">Max heel</span><span style="font-size: 26px; font-weight: 600">24°</span></div>
+    </div>
+
+    <section aria-labelledby="map-h" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 id="map-h" style="margin: 0; font-size: 22px; font-weight: 600">Track</h2>
+      <div style="position: relative; border-radius: 16px; overflow: hidden; border: 1px solid #E4E8EE; background: #DCEBF3">
+        <svg viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Track from Pula harbour north-west to the Brijuni islands, tacking upwind, and a direct reach back" style="display: block; width: 100%; height: 460px">
+          <rect width="1200" height="500" fill="#DCEBF3"></rect>
+          <path d="M1200 0 L860 0 C840 60 900 110 870 160 C840 210 900 250 880 300 C860 340 800 360 820 410 C835 450 900 470 920 500 L1200 500 Z" fill="#F2EFE6" stroke="#D6D0BE" stroke-width="1.5"></path>
+          <path d="M520 70 C560 50 610 70 600 110 C590 150 540 160 515 135 C495 115 495 85 520 70 Z" fill="#F2EFE6" stroke="#D6D0BE" stroke-width="1.5"></path>
+          <path d="M630 150 C655 140 675 160 665 180 C655 198 630 196 622 180 C616 168 618 156 630 150 Z" fill="#F2EFE6" stroke="#D6D0BE" stroke-width="1.5"></path>
+          <path d="M470 170 C485 162 500 172 495 186 C490 198 472 198 466 188 C462 180 463 174 470 170 Z" fill="#F2EFE6" stroke="#D6D0BE" stroke-width="1.5"></path>
+          <polyline points="880,420 820,400 840,360 770,345 790,300 715,285 735,240 660,225 680,190 615,175 590,160" fill="none" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"></polyline>
+          <polyline points="590,160 640,215 720,290 800,360 880,420" fill="none" stroke="#8A8A8A" stroke-width="3.5" stroke-dasharray="10 7" stroke-linecap="round"></polyline>
+          <circle cx="880" cy="420" r="9" fill="#FFFFFF" stroke="#111111" stroke-width="3"></circle>
+          <circle cx="590" cy="160" r="7" fill="#111111"></circle>
+          <text x="900" y="446" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#1E2433">Pula</text>
+          <text x="470" y="58" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#1E2433">Veli Brijun</text>
+          <text x="1010" y="120" font-family="Arial, sans-serif" font-size="15" fill="#6B7280">Istria</text>
+          <g transform="translate(120 90)">
+            <circle r="34" fill="#FFFFFF" stroke="#CBD2DB"></circle>
+            <path d="M-14 -14 L10 10" stroke="#111111" stroke-width="3" stroke-linecap="round"></path>
+            <path d="M10 10 L10 -2 M10 10 L-2 10" stroke="#111111" stroke-width="3" stroke-linecap="round"></path>
+            <text y="56" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#1E2433">NW 12 kn</text>
+          </g>
+        </svg>
+        <div style="position: absolute; left: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 16px; padding: 10px 14px; background: #FFFFFF; border-radius: 10px; box-shadow: 0 4px 12px rgba(30,36,51,0.12); font-size: 13px">
+          <span style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 20px; height: 3px; background: #111111; border-radius: 2px"></span>Outbound · upwind</span>
+          <span style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 20px; height: 0; border-top: 3px dashed #8A8A8A"></span>Return · broad reach</span>
+        </div>
+        <div style="position: absolute; right: 16px; top: 16px; display: flex; flex-direction: column; gap: 4px">
+          <button type="button" aria-label="Zoom in" style="width: 44px; height: 44px; border: 1px solid #CBD2DB; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 20px; color: #1E2433">+</button>
+          <button type="button" aria-label="Zoom out" style="width: 44px; height: 44px; border: 1px solid #CBD2DB; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 20px; color: #1E2433">−</button>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 13px; color: #6B7280">Illustrative map. On the live site this is an OpenStreetMap / OpenSeaMap layer drawn from the trip's GPS log.</p>
+    </section>
+
+    <section aria-labelledby="perf-h" style="display: flex; flex-direction: column; gap: 16px">
+      <h2 id="perf-h" style="margin: 0; font-size: 22px; font-weight: 600">Speed and wind</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 16px">
+        <figure style="margin: 0; flex: 1 1 460px; min-width: 0; border: 1px solid #E4E8EE; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <figcaption style="display: flex; justify-content: space-between; gap: 8px; font-size: 15px; font-weight: 500"><span>Speed over ground</span><span style="color: #6B7280; font-weight: 400; font-size: 13px">kn</span></figcaption>
+          <svg viewBox="0 0 560 220" role="img" aria-label="Speed over ground: around 4 knots tacking out to Brijuni, rising to a peak of 7.8 knots on the reach home" style="display: block; width: 100%; height: auto">
+            <line x1="40" y1="20" x2="540" y2="20" stroke="#EEF1F5"></line>
+            <line x1="40" y1="73" x2="540" y2="73" stroke="#EEF1F5"></line>
+            <line x1="40" y1="127" x2="540" y2="127" stroke="#EEF1F5"></line>
+            <line x1="40" y1="180" x2="540" y2="180" stroke="#CBD2DB"></line>
+            <text x="32" y="24" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">9</text>
+            <text x="32" y="77" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">6</text>
+            <text x="32" y="131" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">3</text>
+            <text x="32" y="184" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">0</text>
+            <text x="40" y="204" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">09:10</text>
+            <text x="312" y="204" text-anchor="middle" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">12:15 · Brijuni</text>
+            <text x="540" y="204" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">14:50</text>
+            <line x1="312" y1="20" x2="312" y2="180" stroke="#CBD2DB" stroke-dasharray="3 4"></line>
+            <polyline points="40.0,108.9 47.4,101.9 54.7,100.2 62.1,135.3 69.4,112.8 76.8,117.6 84.1,115.8 91.5,139.0 98.8,101.8 106.2,100.3 113.5,105.2 120.9,143.2 128.2,117.6 135.6,115.7 142.9,108.6 150.3,132.0 157.6,100.3 165.0,105.4 172.4,113.1 179.7,147.9 187.1,115.6 194.4,108.4 201.8,101.7 209.1,130.6 216.5,105.5 223.8,113.2 231.2,117.7 238.5,145.7 245.9,108.3 253.2,101.6 260.6,100.4 267.9,135.9 275.3,113.3 282.6,117.7 290.0,115.4 297.4,138.4 304.7,101.5 312.1,97.0 319.4,93.6 326.8,82.4 334.1,75.6 341.5,79.1 348.8,83.9 356.2,79.2 363.5,68.3 370.9,63.9 378.2,69.4 385.6,74.0 392.9,68.5 400.3,59.0 407.6,57.7 415.0,65.3 422.4,41.3 429.7,64.2 437.1,56.7 444.4,58.7 451.8,68.1 459.1,72.4 466.5,67.0 473.8,61.8 481.2,66.8 488.5,77.5 495.9,81.1 503.2,75.8 510.6,72.8 517.9,80.3 525.3,91.3 532.6,93.6 540.0,88.1" fill="none" stroke="#111111" stroke-width="2" stroke-linejoin="round"></polyline>
+          </svg>
+        </figure>
+        <figure style="margin: 0; flex: 1 1 460px; min-width: 0; border: 1px solid #E4E8EE; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <figcaption style="display: flex; justify-content: space-between; gap: 8px; font-size: 15px; font-weight: 500"><span>True wind speed</span><span style="color: #6B7280; font-weight: 400; font-size: 13px">kn</span></figcaption>
+          <svg viewBox="0 0 560 220" role="img" aria-label="True wind speed: building from 8 knots in the morning to 19 knots around 13:00, easing to 13 knots by arrival" style="display: block; width: 100%; height: auto">
+            <line x1="40" y1="20" x2="540" y2="20" stroke="#EEF1F5"></line>
+            <line x1="40" y1="73" x2="540" y2="73" stroke="#EEF1F5"></line>
+            <line x1="40" y1="127" x2="540" y2="127" stroke="#EEF1F5"></line>
+            <line x1="40" y1="180" x2="540" y2="180" stroke="#CBD2DB"></line>
+            <text x="32" y="24" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">24</text>
+            <text x="32" y="77" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">16</text>
+            <text x="32" y="131" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">8</text>
+            <text x="32" y="184" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">0</text>
+            <text x="40" y="204" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">09:10</text>
+            <text x="312" y="204" text-anchor="middle" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">12:15 · Brijuni</text>
+            <text x="540" y="204" text-anchor="end" font-size="12" fill="#6B7280" font-family="Arial, sans-serif">14:50</text>
+            <line x1="312" y1="20" x2="312" y2="180" stroke="#CBD2DB" stroke-dasharray="3 4"></line>
+            <polyline points="40.0,126.7 47.4,119.4 54.7,122.6 62.1,123.1 69.4,113.9 76.8,109.9 84.1,114.3 91.5,111.4 98.8,102.0 106.2,101.7 113.5,105.5 120.9,99.3 128.2,91.5 135.6,94.3 142.9,96.1 150.3,87.6 157.6,82.9 165.0,87.6 172.4,86.1 179.7,77.0 187.1,76.2 194.4,80.9 201.8,76.2 209.1,68.4 216.5,71.1 223.8,74.2 231.2,67.0 238.5,62.0 245.9,67.1 253.2,67.4 260.6,59.2 267.9,58.1 275.3,63.9 282.6,60.9 290.0,53.5 297.4,56.2 304.7,61.0 312.1,55.3 319.4,53.3 326.8,56.0 334.1,58.3 341.5,53.3 348.8,53.3 356.2,56.9 363.5,56.0 370.9,53.3 378.2,55.1 385.6,62.9 392.9,60.4 400.3,57.0 407.6,64.2 415.0,69.4 422.4,64.7 429.7,64.4 437.1,73.0 444.4,74.8 451.8,69.5 459.1,72.8 466.5,81.0 473.8,79.4 481.2,75.4 488.5,81.8 495.9,87.9 503.2,83.7 510.6,82.4 517.9,90.7 525.3,93.6 532.6,88.3 540.0,90.6" fill="none" stroke="#111111" stroke-width="2" stroke-linejoin="round"></polyline>
+          </svg>
+        </figure>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px">
+      <section aria-labelledby="legs-h" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+        <h2 id="legs-h" style="margin: 0; font-size: 22px; font-weight: 600">Legs</h2>
+        <div style="overflow-x: auto; border: 1px solid #E4E8EE; border-radius: 12px">
+          <table style="width: 100%; min-width: 560px; border-collapse: collapse; font-size: 14px">
+            <thead>
+              <tr style="background: #F8FAFC; text-align: left">
+                <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE">Leg</th>
+                <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE">Point of sail</th>
+                <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Distance</th>
+                <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Time</th>
+                <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Avg SOG</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #E4E8EE; font-weight: 500">Pula → Veli Brijun</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #E4E8EE">Close-hauled · 9 tacks</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #E4E8EE; text-align: right">11.8 nm</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #E4E8EE; text-align: right">3 h 05 m</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #E4E8EE; text-align: right">3.8 kn</td>
+              </tr>
+              <tr>
+                <td style="padding: 14px 16px; font-weight: 500">Veli Brijun → Pula</td>
+                <td style="padding: 14px 16px">Broad reach</td>
+                <td style="padding: 14px 16px; text-align: right">12.8 nm</td>
+                <td style="padding: 14px 16px; text-align: right">2 h 35 m</td>
+                <td style="padding: 14px 16px; text-align: right">5.0 kn</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="sens-h" style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+        <h2 id="sens-h" style="margin: 0; font-size: 22px; font-weight: 600">Sensors</h2>
+        <dl style="margin: 0; border: 1px solid #E4E8EE; border-radius: 12px; display: flex; flex-direction: column">
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #E4E8EE; font-size: 14px"><dt style="color: #4B5563">Avg TWA upwind</dt><dd style="margin: 0; font-weight: 500">42°</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #E4E8EE; font-size: 14px"><dt style="color: #4B5563">TWD range</dt><dd style="margin: 0; font-weight: 500">295° – 320°</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #E4E8EE; font-size: 14px"><dt style="color: #4B5563">Min depth</dt><dd style="margin: 0; font-weight: 500">4.1 m</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #E4E8EE; font-size: 14px"><dt style="color: #4B5563">Sea temp</dt><dd style="margin: 0; font-weight: 500">20.1 °C</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #E4E8EE; font-size: 14px"><dt style="color: #4B5563">Air temp</dt><dd style="margin: 0; font-weight: 500">18 – 23 °C</dd></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; font-size: 14px"><dt style="color: #4B5563">Pressure</dt><dd style="margin: 0; font-weight: 500">1016 → 1012 hPa</dd></div>
+        </dl>
+      </section>
+    </div>
+
+
+  </main>
+
+  <footer style="background: #111111; color: #C4C4C4">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 28px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px">
+      <span>kisero.org · First 27 SE · CRO 2882</span>
+      <span>Data from onboard NMEA 2000 sensors</span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
