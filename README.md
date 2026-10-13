@@ -9,22 +9,15 @@ A responsive sailing log for KISERO, a Beneteau First 27 SE sailing from Pula, C
 - `styles.css` — legacy responsive styling retained for reuse
 - `favicon.svg` — browser icon
 - `amplify.yml` — buildless AWS Amplify Hosting configuration
-- `site-deploy.zip` — `index.html`, `trip.html`, `styles.css`, and `favicon.svg`, packaged for an Amplify manual deployment
+- `site-deploy.zip` — `index.html`, `trip.html`, `styles.css`, and `favicon.svg`, retained for manual deployment or backup
 
 ## Publish with AWS Amplify Hosting
 
-The repository is public, so Amplify can retrieve the deployment archive from its raw GitHub URL without GitHub account authorization. This keeps deployment access limited to this repository's public artifact and avoids long-lived AWS credentials.
+AWS Amplify is connected to this repository's `main` branch. Every push to `main` starts a build and deploys the site automatically. The site is plain HTML and CSS, so Amplify publishes the repository root without a build command; these settings are in `amplify.yml`.
 
-1. In AWS, create a new Amplify app using **Deploy without Git** and name it `kisero-org`.
-2. Set the branch name to `main`, choose **Any URL**, and use `https://raw.githubusercontent.com/kisero/kisero.org/main/site-deploy.zip` as the resource URL.
-3. Choose **Save and deploy**.
-4. In **Hosting → Custom domains**, add `kisero.org` and map `www` to the `main` branch. Use Amplify's generated DNS values; do not guess the target hostname.
-5. In GoDaddy DNS, replace the existing `www` CNAME that points to `kisero.org` with the exact `www` CNAME target Amplify provides. Add any new certificate-validation CNAME that Amplify provides, keeping the record name and value exactly as shown. Leave the existing root A record and other DNS records untouched.
-6. Wait for the Amplify custom-domain status to show **Available** and then verify `https://www.kisero.org`.
+Make and commit changes in your local clone, then push them to `main`. The Amplify GitHub App is scoped to `kisero/kisero.org` for this deployment.
 
-Amplify manual deployments do not automatically start when a commit is pushed. After changing the site files, rebuild `site-deploy.zip`, commit and push it, then start a new deployment in Amplify using the same URL.
-
-AWS Amplify's custom-domain setup and certificate validation can take time to propagate. Its usage-based hosting and build charges depend on traffic and build minutes; review current AWS pricing before enabling hosting.
+The `kisero.org`, `www.kisero.org`, and `test.kisero.org` hostnames are mapped to the `main` branch in the Git-connected app. Finish the domain's nameserver update at the registrar and wait for Amplify's managed certificate and domain status to become available before relying on the custom domain. The Amplify Hosting URL is available while DNS propagates.
 
 ## Local preview
 
