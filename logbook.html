@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111916"><title>Sailing log — Kisero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <style>
+    :root{--ink:#17211f;--muted:#66736f;--line:#e3e9e6;--wash:#f4f7f5;--green:#19664f}*{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:15px/1.5 "DM Sans",sans-serif}.top{background:#111916;color:white}.wrap{width:min(1000px,calc(100% - 36px));margin:auto}.top .wrap{padding:22px 0 32px}.nav{display:flex;justify-content:space-between;margin-bottom:35px}.nav a{color:#d0d9d4;text-decoration:none}.brand{font:italic 800 20px Manrope,sans-serif}.eyebrow{color:#9ec9b8;text-transform:uppercase;letter-spacing:.13em;font-size:11px;font-weight:700}.top h1{font:700 clamp(32px,6vw,48px)/1.1 Manrope,sans-serif;margin:5px 0}.top p{color:#c4d0ca}.main{padding:28px 0 64px}.status,.trip{background:white;border:1px solid var(--line);border-radius:15px;padding:20px;margin-bottom:14px}.status{color:var(--muted)}.trip h2{font:700 19px Manrope,sans-serif;margin:0 0 8px}.meta{color:var(--muted);font-size:13px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.actions a{color:var(--green);font-weight:600}.map{height:360px;border-radius:11px;border:1px solid var(--line);margin-top:15px}.track-note{font-size:12px;color:var(--muted)}.footer{background:#111916;color:#aebbb4;padding:22px 0;font-size:12px}
+  </style>
+</head>
+<body><header class="top"><div class="wrap"><nav class="nav"><a href="index.html">← Home</a><a class="brand" href="index.html">KISERO</a></nav><span class="eyebrow">Boat logbook</span><h1>Sailing sessions</h1><p>Recorded trips, GPS tracks, and speeds from the boat log. Exact coordinates are public.</p></div></header>
+<main class="wrap main"><div id="status" class="status" role="status">Loading recorded sessions…</div><p class="track-note">Times are shown as recorded; the export does not specify a timezone. Cabin temperature and humidity are unavailable until those sensors report.</p><div id="trips"></div></main><footer class="footer"><div class="wrap">Kisero · Exact tracks are published for public viewing.</div></footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const API_BASE = "https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
+const params = new URLSearchParams(location.search);
+const DEMO = params.get("demo") === "1";
+const root = DEMO ? "preview-data" : API_BASE;
+const tripsRoot = document.querySelector("#trips");
+const statusBox = document.querySelector("#status");
+const niceTime = value => {const [date,time=""]=value.split("T");return new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"})+(time?`, ${time.slice(0,5)}`:"");};
+async function start(){
+  try{
+    if(!DEMO && API_BASE.startsWith("__")) throw new Error("The public logbook is not connected yet.");
+    const indexResponse=await fetch(`${root}/v1/trips`.replace("preview-data/v1/trips","preview-data/index.json"));
+    if(!indexResponse.ok)throw new Error("Trip summaries could not be loaded.");
+    const index = await indexResponse.json();
+    const items = index.trips || [];
+    statusBox.textContent = items.length ? `${items.length} underway session${items.length===1?"":"s"} · exact tracks shown` : "No sessions have been recorded yet.";
+    for(const trip of items){
+      const article=document.createElement("article");article.className="trip";
+      const title=document.createElement("h2");title.textContent=niceTime(trip.start);
+      const meta=document.createElement("div");meta.className="meta";meta.textContent=`${niceTime(trip.start)} – ${niceTime(trip.end)} · ${trip.pointCount} points · ${trip.distanceNm} nm · avg ${trip.averageSogKn} kn · max ${trip.maxSogKn} kn`;
+      const map=document.createElement("div");map.className="map";map.setAttribute("aria-label","Exact public GPS track");
+      const detail=DEMO?`${root}/${trip.id}.json`:`${root}/v1/trips/${encodeURIComponent(trip.id)}`;
+      const note=document.createElement("p");note.className="track-note";note.textContent="Exact GPS track · Map © OpenStreetMap contributors · "
+      const download=document.createElement("a");download.href=detail;download.textContent="Download exact track data (JSON)";download.target="_blank";download.rel="noopener";download.style.color="var(--green)";download.style.fontWeight="600";note.append(download);
+      article.append(title,meta,map,note);tripsRoot.append(article);
+      const dataResponse=await fetch(detail);if(!dataResponse.ok)throw new Error("A trip track could not be loaded.");
+      const data=await dataResponse.json();
+      if(!Array.isArray(data.track)||!data.track.length)throw new Error("A trip has no GPS points to display.");
+      const points=data.track.map(p=>[p[1],p[0]]);
+      const leaflet=L.map(map,{scrollWheelZoom:false}).setView(points[0],12);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap contributors",maxZoom:19}).addTo(leaflet);
+      const line=L.polyline(points,{color:"#19664f",weight:4}).addTo(leaflet);L.circleMarker(points[0],{radius:5,color:"#19664f"}).addTo(leaflet);L.circleMarker(points.at(-1),{radius:5,color:"#bd5739"}).addTo(leaflet);leaflet.fitBounds(line.getBounds(),{padding:[18,18]});
+    }
+  }catch(error){statusBox.textContent=`${error.message} This preview can be reviewed locally before publication.`;}
+}
+start();
+</script></body></html>

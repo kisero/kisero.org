@@ -5,7 +5,8 @@ A responsive sailing log for KISERO, a Beneteau First 27 SE sailing from Pula, C
 ## Files
 
 - `index.html` — boat status and sailing log
-- `trip.html` — detailed trip page
+- `trip.html` — existing detailed sample trip page
+- `logbook.html` — API-backed public exact-track logbook
 - `styles.css` — legacy responsive styling retained for reuse
 - `favicon.svg` — browser icon
 - `amplify.yml` — buildless AWS Amplify Hosting configuration
