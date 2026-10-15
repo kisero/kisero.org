@@ -36,7 +36,7 @@
       <article class="card stat"><span class="label">GPS distance estimate</span><span class="value" id="stat-distance">— <span class="unit">nm</span></span></article>
       <article class="card stat"><span class="label">Recorded duration</span><span class="value" id="stat-duration">—</span></article>
       <article class="card stat"><span class="label">Avg / max SOG</span><span class="value" id="stat-sog">— / — <span class="unit">kn</span></span></article>
-      <article class="card stat"><span class="label">Avg / max TWS</span><span class="value">— / — <span class="unit">kn</span></span><span class="label">Sample placeholder · wind summary unavailable</span></article>
+      <article class="card stat"><span class="label">Avg / max TWS</span><span class="value" id="stat-tws">— / — <span class="unit">kn</span></span><span class="label" id="stat-tws-note">Wind readings unavailable</span></article>
     </section>
 
     <section class="panel" aria-labelledby="track-title">
@@ -45,18 +45,18 @@
         <div id="track-map" class="leaflet-map" role="application" aria-label="Interactive sailing track map"></div>
         <div class="map-legend"><span>GPS track · SOG</span><small>0 kn</small><div class="map-speed-scale" aria-hidden="true"></div><small>8+ kn</small></div>
       </div>
-      <p class="map-caption">Click the track to inspect recorded speed. Wind readings are shown as sample placeholders because the public trip feed only includes GPS and speed. Map data © OpenStreetMap contributors.</p>
+      <p class="map-caption">Click the track to inspect recorded speed and wind readings where available. Map data © OpenStreetMap contributors.</p>
     </section>
 
     <section class="panel" aria-labelledby="charts-title">
-      <div class="panel-head"><div><h2 id="charts-title">Sailing data</h2><p class="sub">Choose readings to compare · 5-minute averages. GPS speed is available; other channels use sample placeholders.</p></div></div>
+      <div class="panel-head"><div><h2 id="charts-title">Sailing data</h2><p class="sub">Choose readings to compare · 5-minute averages from the sailing log.</p></div></div>
       <div class="charts">
         <details class="chart-card">
           <summary class="chart-title"><span>Speed and wind speed</span><small>knots</small></summary>
           <div class="chart-content"><fieldset class="metric-selector" aria-label="Speed and wind speed metrics">
             <label><input type="checkbox" data-metric="SOG" checked><span>SOG</span></label>
-            <label><input type="checkbox" data-metric="TWS"><span>TWS</span></label>
-            <label><input type="checkbox" data-metric="AWS"><span>AWS</span></label>
+            <label><input type="checkbox" data-metric="TWS" checked><span>TWS</span></label>
+            <label><input type="checkbox" data-metric="AWS" checked><span>AWS</span></label>
           </fieldset><div class="chart-wrap"><svg class="chart" data-group="speed" role="img" aria-label="Selectable speed and wind speed time series"></svg><div class="chart-tooltip" role="status" aria-live="polite"></div></div><div class="chart-legend" data-legend="speed" aria-label="Chart legend"></div></div>
         </details>
         <details class="chart-card">
@@ -73,9 +73,9 @@
     <section class="download" aria-label="Download sailing data"><div><h2>Download recorded track</h2><p id="download-detail">Exact GPS track · JSON</p></div><a id="download-track" href="#" target="_blank" rel="noopener"><span aria-hidden="true">↓</span> Download track JSON</a></section>
 
     <div class="bottom-grid">
-      <section class="panel" aria-labelledby="conditions-title"><div class="panel-head"><div><h2 id="conditions-title">Wind and sea</h2><p class="sub">Sample placeholders · not included in the public trip feed.</p></div></div>
+      <section class="panel" aria-labelledby="conditions-title"><div class="panel-head"><div><h2 id="conditions-title">Wind and sea</h2><p class="sub" id="wind-source-note">Wind readings from the sailing log.</p></div></div>
         <div class="conditions">
-          <div class="condition"><span class="label">Apparent wind · avg / peak</span><span class="value">— / — <span class="unit">kn</span></span></div>
+          <div class="condition"><span class="label">Apparent wind · avg / peak</span><span class="value" id="aws-summary">— / — <span class="unit">kn</span></span></div>
           <div class="condition"><span class="label">Water temperature</span><span class="value">— <span class="unit">°C</span></span></div>
           <div class="condition"><span class="label">Depth range</span><span class="value">— <span class="unit">m</span></span></div>
         </div>
@@ -117,7 +117,8 @@
       document.getElementById('download-detail').textContent=`Exact GPS track · JSON · ${trip.pointCount} points`;
       const detailUrl=`${API}/v1/trips/${encodeURIComponent(trip.id)}`;document.getElementById('download-track').href=detailUrl;
       const response=await fetch(detailUrl);if(!response.ok)throw new Error('The exact GPS track could not be loaded.');
-      const data=await response.json(),points=(data.track||[]).map(row=>({lon:Number(row[0]),lat:Number(row[1]),time:row[2],SOG:Number(row[3])})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));
+      const data=await response.json();let windReadings={};try{const windResponse=await fetch('/assets/wind-readings.json');if(windResponse.ok){const windData=await windResponse.json();if(windData.tripId===trip.id)windReadings=windData.readings||{}}}catch{}
+      const points=(data.track||[]).map(row=>({lon:Number(row[0]),lat:Number(row[1]),time:row[2],SOG:Number(row[3]),...(windReadings[row[2]]||{})})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));
       if(!points.length)throw new Error('This session has no GPS points.');
       document.getElementById('quality-points').textContent=String(points.length);
       const gaps=points.slice(1).map((p,i)=>(Date.parse(p.time)-Date.parse(points[i].time))/1000).filter(n=>n>60);
@@ -125,20 +126,23 @@
       document.getElementById('quality-interval').textContent=intervals.length?niceGap(intervals[Math.floor(intervals.length/2)]):'—';
       document.getElementById('quality-gaps').textContent=String(gaps.length);
       const records=points.map(p=>({...p,ts:Date.parse(p.time)}));
+      const tws=records.map(r=>r.TWS).filter(Number.isFinite),aws=records.map(r=>r.AWS).filter(Number.isFinite);
+      if(tws.length){const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;document.getElementById('stat-tws').innerHTML=`${avg(tws).toFixed(1)} / ${Math.max(...tws).toFixed(1)} <span class="unit">kn</span>`;document.getElementById('stat-tws-note').textContent=`Recorded · ${tws.length} readings`;document.getElementById('wind-source-note').textContent='Recorded wind readings from the sailing log.'}
+      if(aws.length){const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;document.getElementById('aws-summary').innerHTML=`${avg(aws).toFixed(1)} / ${Math.max(...aws).toFixed(1)} <span class="unit">kn</span>`}
       initializeVisuals(records);
     }catch(error){showError(error.message);}
   }
   function initializeVisuals(records){
     const first=records[0].ts,last=records.at(-1).ts,bucketMs=5*60*1000,count=Math.max(1,Math.ceil((last-first)/bucketMs)+1);
-    const values={SOG:records.map(r=>r.SOG),TWS:[],AWS:[],AWA:[],TWA:[],Rudder:[]};
+    const values={SOG:records.map(r=>r.SOG),TWS:records.map(r=>r.TWS),AWS:records.map(r=>r.AWS),AWA:[],TWA:[],Rudder:[]};
     function series(key){const buckets=Array.from({length:count},()=>[]);if(values[key].length)records.forEach((r,i)=>{if(Number.isFinite(values[key][i]))buckets[Math.min(count-1,Math.floor((r.ts-first)/bucketMs))].push(values[key][i])});return buckets.map((bucket,i)=>({t:first+i*bucketMs,v:bucket.length?bucket.reduce((a,b)=>a+b,0)/bucket.length:null}))}
     const plotted=Object.fromEntries(Object.keys(values).map(key=>[key,series(key)]));
-    function render(svg){const card=svg.closest('.chart-card'),checked=[...card.querySelectorAll('[data-metric]:checked')].map(el=>el.dataset.metric),available=checked.filter(key=>plotted[key].some(p=>p.v!==null)),legend=card.querySelector('.chart-legend'),NS='http://www.w3.org/2000/svg',w=1200,h=220,l=52,r=18,t=12,b=32,pw=w-l-r,ph=h-t-b;svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.replaceChildren();legend.replaceChildren();const add=(tag,attrs={},label)=>{const el=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);if(label)el.textContent=label;svg.append(el);return el};if(!available.length){add('text',{x:w/2,y:h/2,'text-anchor':'middle',class:'chart-empty'},'No recorded readings for these sample channels');checked.forEach(key=>{const item=document.createElement('span');item.className='legend-item';item.textContent=`${key} · sample placeholder`;legend.append(item)});return}const max=available.includes('SOG')?9:22;[0,3,6,9].forEach(v=>{const y=t+ph-v/max*ph;add('line',{x1:l,y1:y,x2:w-r,y2:y,class:'axis'});add('text',{x:l-9,y:y+4,'text-anchor':'end',class:'chart-label'},String(v))});add('text',{x:l,y:h-7,class:'chart-label'},new Date(first).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));add('text',{x:w-r,y:h-7,'text-anchor':'end',class:'chart-label'},new Date(last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));available.forEach(key=>{let d='',open=false;plotted[key].forEach(p=>{if(p.v===null){open=false;return}const x=l+(p.t-first)/(last-first||1)*pw,y=t+ph-p.v/max*ph;d+=`${open?'L':'M'}${x.toFixed(1)},${y.toFixed(1)} `;open=true});const path=add('path',{d,class:'chart-path'});path.style.stroke=colors[key];const item=document.createElement('span');item.className='legend-item';const dot=document.createElement('i');dot.className='legend-swatch';dot.style.background=colors[key];item.append(dot,document.createTextNode(`${key} · recorded`));legend.append(item)});checked.filter(key=>!available.includes(key)).forEach(key=>{const item=document.createElement('span');item.className='legend-item';item.textContent=`${key} · sample placeholder`;legend.append(item)});svg.setAttribute('aria-label',`${available.join(', ')} recorded time series`)}
+    function render(svg){const card=svg.closest('.chart-card'),checked=[...card.querySelectorAll('[data-metric]:checked')].map(el=>el.dataset.metric),available=checked.filter(key=>plotted[key].some(p=>p.v!==null)),legend=card.querySelector('.chart-legend'),NS='http://www.w3.org/2000/svg',w=1200,h=220,l=52,r=18,t=12,b=32,pw=w-l-r,ph=h-t-b;svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.replaceChildren();legend.replaceChildren();const add=(tag,attrs={},label)=>{const el=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);if(label)el.textContent=label;svg.append(el);return el};if(!available.length){add('text',{x:w/2,y:h/2,'text-anchor':'middle',class:'chart-empty'},'No recorded readings for these sample channels');checked.forEach(key=>{const item=document.createElement('span');item.className='legend-item';item.textContent=`${key} · sample placeholder`;legend.append(item)});return}const dataMax=Math.max(...available.flatMap(key=>plotted[key].map(p=>p.v).filter(Number.isFinite)),0),max=available.some(key=>key==='TWS'||key==='AWS')?Math.max(20,Math.ceil(dataMax/5)*5):(available.includes('SOG')?9:22),ticks=max>9?[0,5,10,15,20,25].filter(v=>v<=max):[0,3,6,9];ticks.forEach(v=>{const y=t+ph-v/max*ph;add('line',{x1:l,y1:y,x2:w-r,y2:y,class:'axis'});add('text',{x:l-9,y:y+4,'text-anchor':'end',class:'chart-label'},String(v))});add('text',{x:l,y:h-7,class:'chart-label'},new Date(first).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));add('text',{x:w-r,y:h-7,'text-anchor':'end',class:'chart-label'},new Date(last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));available.forEach(key=>{let d='',open=false;plotted[key].forEach(p=>{if(p.v===null){open=false;return}const x=l+(p.t-first)/(last-first||1)*pw,y=t+ph-p.v/max*ph;d+=`${open?'L':'M'}${x.toFixed(1)},${y.toFixed(1)} `;open=true});const path=add('path',{d,class:'chart-path'});path.style.stroke=colors[key];const item=document.createElement('span');item.className='legend-item';const dot=document.createElement('i');dot.className='legend-swatch';dot.style.background=colors[key];item.append(dot,document.createTextNode(`${key} · recorded`));legend.append(item)});checked.filter(key=>!available.includes(key)).forEach(key=>{const item=document.createElement('span');item.className='legend-item';item.textContent=`${key} · sample placeholder`;legend.append(item)});svg.setAttribute('aria-label',`${available.join(', ')} recorded time series`)}
     document.querySelectorAll('.chart').forEach(svg=>render(svg));document.querySelectorAll('[data-metric]').forEach(input=>input.addEventListener('change',()=>render(input.closest('.chart-card').querySelector('.chart'))));
     const mapNode=document.getElementById('track-map');if(!window.L){mapNode.textContent='Map library could not be loaded.';return}
     const map=L.map(mapNode,{scrollWheelZoom:false,preferCanvas:true}).setView([records[0].lat,records[0].lon],13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);
     const segments=L.featureGroup().addTo(map);function sogColor(value){if(value<3)return '#347b96';if(value<5)return '#19664f';if(value<7)return '#d09b36';return '#d45b35'}
-    for(let i=1;i<records.length;i++){const a=records[i-1],b=records[i];if(b.ts-a.ts>60*1000)continue;const avg=(a.SOG+b.SOG)/2,popup=`<div class="track-popup-time">${b.time.slice(11,19)}</div><div class="track-popup-grid"><span>SOG</span><strong>${avg.toFixed(1)} kn</strong><span>TWS</span><strong>Sample · —</strong><span>AWS</span><strong>Sample · —</strong></div>`;L.polyline([[a.lat,a.lon],[b.lat,b.lon]],{color:sogColor(avg),weight:6,opacity:.96,lineCap:'round',lineJoin:'round'}).addTo(segments).bindPopup(popup)}
+    for(let i=1;i<records.length;i++){const a=records[i-1],b=records[i];if(b.ts-a.ts>60*1000)continue;const avg=(a.SOG+b.SOG)/2,popup=`<div class="track-popup-time">${b.time.slice(11,19)}</div><div class="track-popup-grid"><span>SOG</span><strong>${avg.toFixed(1)} kn</strong><span>TWS</span><strong>${Number.isFinite(b.TWS)?b.TWS.toFixed(1)+' kn':'—'}</strong><span>AWS</span><strong>${Number.isFinite(b.AWS)?b.AWS.toFixed(1)+' kn':'—'}</strong></div>`;L.polyline([[a.lat,a.lon],[b.lat,b.lon]],{color:sogColor(avg),weight:6,opacity:.96,lineCap:'round',lineJoin:'round'}).addTo(segments).bindPopup(popup)}
     const linePoints=records.map(p=>[p.lat,p.lon]);if(segments.getBounds().isValid())map.fitBounds(segments.getBounds(),{padding:[35,35],maxZoom:15});L.circleMarker(linePoints[0],{radius:5,color:'#19664f',fillOpacity:1}).addTo(map).bindPopup('Start · recorded GPS');L.circleMarker(linePoints.at(-1),{radius:5,color:'#bd5739',fillOpacity:1}).addTo(map).bindPopup('End · recorded GPS');
   }
   start();
