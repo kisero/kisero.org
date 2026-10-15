@@ -135,7 +135,7 @@ a{color:inherit}
           <tbody id="trip-rows"><tr><td colspan="8" style="padding:16px;color:#6B7280">Loading recorded trips…</td></tr></tbody>
         </table>
       </div>
-      <p style="margin: -14px 0 0; font-size: 13px; color: #6B7280">Wind readings marked “Sample” are placeholders; the uploaded log does not include wind values in the public summary.</p>
+      <p style="margin: -14px 0 0; font-size: 13px; color: #6B7280">Routes use the first and last GPS fixes. Wind speed and direction are calculated from the recorded boat sensors.</p>
     </div>
   </section>
 
@@ -190,6 +190,16 @@ a{color:inherit}
   const fmtDate=value=>{const [day,time=""]=value.split('T');return new Date(`${day}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})+(time?` · ${time.slice(0,5)}`:'')};
   const duration=(start,end)=>{const a=new Date(`${start}Z`),b=new Date(`${end}Z`),mins=Math.max(0,Math.round((b-a)/60000));return `${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`};
   const cell=(text,styles='')=>{const td=document.createElement('td');td.textContent=text;td.style.cssText=`padding:14px 16px;border-bottom:1px solid #E4E8EE;${styles}`;return td};
+  const coord=(lat,lon)=>`${Math.abs(lat).toFixed(6)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(6)}° ${lon>=0?'E':'W'}`;
+  const compass=bearing=>['N','NE','E','SE','S','SW','W','NW'][Math.round((bearing%360)/45)%8];
+  const windName=bearing=>bearing>=45&&bearing<135?'Levante':bearing>=225&&bearing<285?'Poniente':bearing>=285||bearing<45?'Terral':compass(bearing);
+  const windStats=readings=>{
+    const speed=Object.values(readings||{}).map(row=>Number(row.TWS)).filter(Number.isFinite);
+    const directions=Object.values(readings||{}).map(row=>Number(row.TWD)).filter(Number.isFinite).map(value=>value*Math.PI/180);
+    let bearing=null;
+    if(directions.length){const sin=directions.reduce((sum,value)=>sum+Math.sin(value),0),cos=directions.reduce((sum,value)=>sum+Math.cos(value),0);bearing=(Math.atan2(sin,cos)*180/Math.PI+360)%360;}
+    return {speed:speed.length?`${(speed.reduce((sum,value)=>sum+value,0)/speed.length).toFixed(1)} / ${Math.max(...speed).toFixed(1)} kn`:'— / — kn',bearing};
+  };
   fetch(`${API}/v1/trips`).then(response=>{if(!response.ok)throw new Error('Trip data is temporarily unavailable.');return response.json()}).then(async payload=>{
     const trips=payload.trips||[];
     if(!trips.length){status.textContent='No recorded sail yet';detail.textContent='The boat log will appear here after its first upload';rows.innerHTML='<tr><td colspan="8" style="padding:16px;color:#6B7280">No sailing sessions recorded yet.</td></tr>';return;}
@@ -200,20 +210,32 @@ a{color:inherit}
     const underwayMinutes=trips.reduce((sum,trip)=>sum+Math.max(0,Math.round((new Date(`${trip.end}Z`)-new Date(`${trip.start}Z`))/60000)),0);document.getElementById('season-duration').textContent=`${Math.floor(underwayMinutes/60)} h ${String(underwayMinutes%60).padStart(2,'0')} m`;
     document.getElementById('season-trips').textContent=String(trips.length);
     document.getElementById('season-speed').textContent=`${Math.max(...trips.map(trip=>Number(trip.maxSogKn||0))).toFixed(1)} kn`;
+    const sensorResponse=await fetch('assets/sensor-readings.json');
+    const sensorData=sensorResponse.ok?await sensorResponse.json():{readings:{}};
+    const detailsById=new Map(await Promise.all(trips.map(async trip=>{
+      try{const response=await fetch(`${API}/v1/trips/${encodeURIComponent(trip.id)}`);return [trip.id,response.ok?await response.json():null];}catch{return [trip.id,null];}
+    })));
     rows.replaceChildren();
     for(const trip of trips){
+      const track=detailsById.get(trip.id)?.track||[];
+      const first=track[0],last=track[track.length-1];
       const tr=document.createElement('tr');
       tr.append(cell(fmtDate(trip.start),'white-space:nowrap;color:#4B5563'));
-      const route=cell('Recorded sailing session','font-weight:500');const routeLink=document.createElement('a');routeLink.href='logbook.html';routeLink.textContent='Recorded sailing session';routeLink.style.cssText='color:#1E2433;text-decoration:none';route.replaceChildren(routeLink);tr.append(route);
+      const route=cell('','font-weight:500;min-width:250px');
+      const routeLink=document.createElement('a');routeLink.href='logbook.html';routeLink.setAttribute('aria-label','Open exact GPS track');routeLink.style.cssText='display:grid;gap:4px;color:#1E2433;text-decoration:none;font-size:12px;line-height:1.35;font-variant-numeric:tabular-nums';
+      if(first&&last){routeLink.innerHTML=`<span><span style="color:#6B7280">From</span> ${coord(Number(first[1]),Number(first[0]))}</span><span><span style="color:#6B7280">To</span> ${coord(Number(last[1]),Number(last[0]))}</span>`;routeLink.title=`GPS track: ${first[2]} to ${last[2]}`;}else{routeLink.textContent='GPS track unavailable';}
+      route.replaceChildren(routeLink);tr.append(route);
       tr.append(cell(`${Number(trip.distanceNm).toFixed(2)} nm`,'text-align:right;font-variant-numeric:tabular-nums'));
       tr.append(cell(duration(trip.start,trip.end),'text-align:right;font-variant-numeric:tabular-nums'));
       tr.append(cell(`${Number(trip.averageSogKn).toFixed(1)} / ${Number(trip.maxSogKn).toFixed(1)} kn`,'text-align:right;font-variant-numeric:tabular-nums'));
-      tr.append(cell('— / — kn','text-align:right;font-variant-numeric:tabular-nums'));
-      const wind=cell('Sample','');const badge=document.createElement('span');badge.textContent='Sample';badge.title='Wind direction is a placeholder; the public trip summary has no wind data.';badge.style.cssText='display:inline-block;padding:3px 10px;border-radius:999px;background:#EEEEEE;color:#555;font-size:13px';wind.replaceChildren(badge);tr.append(wind);
+      const stats=windStats(trip.id===sensorData.tripId?sensorData.readings:{});
+      tr.append(cell(stats.speed,'text-align:right;font-variant-numeric:tabular-nums'));
+      const wind=cell('','');
+      if(stats.bearing!==null){const badge=document.createElement('span');const degrees=Math.round(stats.bearing);badge.textContent=`${windName(stats.bearing)} · ${degrees}°`;badge.title=`Circular mean of ${Object.values(sensorData.readings||{}).filter(row=>Number.isFinite(Number(row.TWD))).length} recorded true-wind direction readings`;badge.style.cssText='display:inline-block;padding:3px 10px;border-radius:999px;background:#E8F2EE;color:#205F4D;font-size:13px;white-space:nowrap';wind.append(badge);}else{wind.textContent='—';wind.style.color='#6B7280';}
+      tr.append(wind);
       const action=cell('','text-align:right');const link=document.createElement('a');link.href='logbook.html';link.textContent='Details →';link.style.cssText='display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border-radius:8px;color:#111;text-decoration:none;font-weight:500;white-space:nowrap';action.append(link);tr.append(action);rows.append(tr);
     }
-    const response=await fetch(`${API}/v1/trips/${encodeURIComponent(latest.id)}`);
-    if(response.ok){const tripData=await response.json(),point=tripData.track?.[0];if(point){const lat=Number(point[1]),lon=Number(point[0]);boatPosition=[lat,lon];document.getElementById('boat-coordinates').textContent=`${Math.abs(lat).toFixed(4)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(4)}° ${lon>=0?'E':'W'}`;document.querySelector('.locate-sample').textContent='First GPS position in the latest recorded track';document.getElementById('boat-speed').textContent=`${latest.averageSogKn} kn avg`;if(map&&boatMarker){boatMarker.setLatLng(boatPosition);map.setView(boatPosition,13);}}}
+    const latestTrack=detailsById.get(latest.id)?.track,point=latestTrack?.[0];if(point){const lat=Number(point[1]),lon=Number(point[0]);boatPosition=[lat,lon];document.getElementById('boat-coordinates').textContent=`${Math.abs(lat).toFixed(4)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(4)}° ${lon>=0?'E':'W'}`;document.querySelector('.locate-sample').textContent='First GPS position in the latest recorded track';document.getElementById('boat-speed').textContent=`${latest.averageSogKn} kn avg`;if(map&&boatMarker){boatMarker.setLatLng(boatPosition);map.setView(boatPosition,13);}}
   }).catch(error=>{status.textContent='Boat data temporarily unavailable';detail.textContent=error.message;rows.innerHTML='<tr><td colspan="8" style="padding:16px;color:#8A5300">Trip summaries could not be loaded. Try the sailing log again shortly.</td></tr>';});
   const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Latest sailing area').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
