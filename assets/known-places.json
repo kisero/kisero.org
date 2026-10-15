@@ -1,0 +1,15 @@
+{
+  "source": "OpenStreetMap Nominatim reverse lookup",
+  "retrieved": "2026-10-15",
+  "attribution": "© OpenStreetMap contributors",
+  "attributionUrl": "https://www.openstreetmap.org/copyright",
+  "places": [
+    {
+      "name": "Puerto Deportivo José Banús",
+      "locality": "Marbella",
+      "lat": 36.486638,
+      "lon": -4.950202,
+      "radiusMeters": 400
+    }
+  ]
+}

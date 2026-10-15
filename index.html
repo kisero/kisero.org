@@ -135,7 +135,7 @@ a{color:inherit}
           <tbody id="trip-rows"><tr><td colspan="8" style="padding:16px;color:#6B7280">Loading recorded trips…</td></tr></tbody>
         </table>
       </div>
-      <p style="margin: -14px 0 0; font-size: 13px; color: #6B7280">Routes use the first and last GPS fixes. Wind speed and direction are calculated from the recorded boat sensors.</p>
+      <p style="margin: -14px 0 0; font-size: 13px; color: #6B7280">Port names are matched to GPS positions; coordinates remain available below each route. Place data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p>
     </div>
   </section>
 
@@ -191,6 +191,8 @@ a{color:inherit}
   const duration=(start,end)=>{const a=new Date(`${start}Z`),b=new Date(`${end}Z`),mins=Math.max(0,Math.round((b-a)/60000));return `${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`};
   const cell=(text,styles='')=>{const td=document.createElement('td');td.textContent=text;td.style.cssText=`padding:14px 16px;border-bottom:1px solid #E4E8EE;${styles}`;return td};
   const coord=(lat,lon)=>`${Math.abs(lat).toFixed(6)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(6)}° ${lon>=0?'E':'W'}`;
+  const distanceMeters=(a,b)=>{const rad=value=>value*Math.PI/180,dLat=rad(b.lat-a.lat),dLon=rad(b.lon-a.lon),lat1=rad(a.lat),lat2=rad(b.lat),h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;return 6371000*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));};
+  const placeAt=(lat,lon,places)=>places.find(place=>distanceMeters({lat,lon},{lat:Number(place.lat),lon:Number(place.lon)})<=Number(place.radiusMeters||0));
   const compass=bearing=>['N','NE','E','SE','S','SW','W','NW'][Math.round((bearing%360)/45)%8];
   const windName=bearing=>bearing>=45&&bearing<135?'Levante':bearing>=225&&bearing<285?'Poniente':bearing>=285||bearing<45?'Terral':compass(bearing);
   const windStats=readings=>{
@@ -212,6 +214,8 @@ a{color:inherit}
     document.getElementById('season-speed').textContent=`${Math.max(...trips.map(trip=>Number(trip.maxSogKn||0))).toFixed(1)} kn`;
     const sensorResponse=await fetch('assets/sensor-readings.json');
     const sensorData=sensorResponse.ok?await sensorResponse.json():{readings:{}};
+    const placesResponse=await fetch('assets/known-places.json');
+    const knownPlaces=placesResponse.ok?await placesResponse.json():{places:[]};
     const detailsById=new Map(await Promise.all(trips.map(async trip=>{
       try{const response=await fetch(`${API}/v1/trips/${encodeURIComponent(trip.id)}`);return [trip.id,response.ok?await response.json():null];}catch{return [trip.id,null];}
     })));
@@ -223,7 +227,13 @@ a{color:inherit}
       tr.append(cell(fmtDate(trip.start),'white-space:nowrap;color:#4B5563'));
       const route=cell('','font-weight:500;min-width:250px');
       const routeLink=document.createElement('a');routeLink.href='logbook.html';routeLink.setAttribute('aria-label','Open exact GPS track');routeLink.style.cssText='display:grid;gap:4px;color:#1E2433;text-decoration:none;font-size:12px;line-height:1.35;font-variant-numeric:tabular-nums';
-      if(first&&last){routeLink.innerHTML=`<span><span style="color:#6B7280">From</span> ${coord(Number(first[1]),Number(first[0]))}</span><span><span style="color:#6B7280">To</span> ${coord(Number(last[1]),Number(last[0]))}</span>`;routeLink.title=`GPS track: ${first[2]} to ${last[2]}`;}else{routeLink.textContent='GPS track unavailable';}
+      if(first&&last){
+        const startLat=Number(first[1]),startLon=Number(first[0]),endLat=Number(last[1]),endLon=Number(last[0]);
+        const startPlace=placeAt(startLat,startLon,knownPlaces.places||[]),endPlace=placeAt(endLat,endLon,knownPlaces.places||[]);
+        const endpoint=(label,place,lat,lon)=>{const line=document.createElement('span');line.textContent=`${label} · ${place?`${place.name}, ${place.locality}`:coord(lat,lon)}`;const position=document.createElement('span');position.textContent=coord(lat,lon);position.style.cssText='color:#6B7280;font-size:11px;font-weight:400';const group=document.createElement('span');group.style.cssText='display:grid;gap:2px';group.append(line,position);return group;};
+        routeLink.append(endpoint('From',startPlace,startLat,startLon),endpoint('To',endPlace,endLat,endLon));
+        routeLink.setAttribute('aria-label',`From ${startPlace?`${startPlace.name}, ${startPlace.locality}`:coord(startLat,startLon)} to ${endPlace?`${endPlace.name}, ${endPlace.locality}`:coord(endLat,endLon)}; open exact GPS track`);routeLink.title=`GPS track: ${first[2]} to ${last[2]}`;
+      }else{routeLink.textContent='GPS track unavailable';}
       route.replaceChildren(routeLink);tr.append(route);
       tr.append(cell(`${Number(trip.distanceNm).toFixed(2)} nm`,'text-align:right;font-variant-numeric:tabular-nums'));
       tr.append(cell(duration(trip.start,trip.end),'text-align:right;font-variant-numeric:tabular-nums'));
