@@ -1,43 +1,222 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111916"><title>S/Y KISERO</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root{--ink:#17211f;--muted:#66736f;--line:#e3e9e6;--wash:#f4f7f5;--green:#19664f}*{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:16px/1.5 "DM Sans",sans-serif}.wrap{width:min(1000px,calc(100% - 36px));margin:auto}.hero{background:#111916;color:white;padding:26px 0 54px}.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:54px}.brand{font:italic 800 20px Manrope,sans-serif;letter-spacing:.08em}.nav a{color:#d0d9d4;text-decoration:none}.eyebrow{color:#9ec9b8;text-transform:uppercase;letter-spacing:.13em;font-size:11px;font-weight:700}.hero h1{font:800 clamp(38px,8vw,68px)/1.04 Manrope,sans-serif;margin:8px 0}.hero p{color:#c4d0ca;max-width:620px}.facts,.summary,.sensor{background:white;border:1px solid var(--line);border-radius:15px;padding:20px;margin-bottom:14px}.facts{display:flex;flex-wrap:wrap;gap:12px 32px;color:var(--muted)}.facts strong{display:block;color:var(--ink);font-weight:600}.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:32px 0 14px}.section-head h2{font:700 25px Manrope,sans-serif;margin:0}.section-head p{margin:4px 0 0;color:var(--muted)}.button{display:inline-flex;align-items:center;min-height:42px;padding:0 15px;border-radius:9px;background:var(--green);color:white;text-decoration:none;font-weight:600}.summary h3,.sensor h3{font:700 18px Manrope,sans-serif;margin:0 0 6px}.muted{color:var(--muted)}.metrics{display:flex;gap:20px 32px;flex-wrap:wrap;margin-top:14px}.metric strong{display:block;font:700 22px Manrope,sans-serif}.sensor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.sensor p{margin:4px 0 0;color:var(--muted);font-size:14px}.footer{background:#111916;color:#aebbb4;padding:24px 0;margin-top:50px;font-size:13px}.error{color:#8a5300}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S/Y KISERO</title>
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+body{margin:0;background:#FFFFFF;font-family:"DM Sans",sans-serif}
+h1,h2,h3,h4,h5,h6,.metric{font-family:"Manrope",sans-serif}
+a{color:inherit}
+.locate-dialog{width:min(900px,calc(100vw - 32px));padding:0;border:0;border-radius:16px;overflow:hidden;color:#1E2433;box-shadow:0 20px 70px #0005;font:15px/1.5 "DM Sans",sans-serif}.locate-dialog::backdrop{background:#07100dcc}.locate-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px}.locate-head h2{margin:0;font:700 21px Manrope,sans-serif}.locate-head p{margin:5px 0 0;color:#6B7280;font-size:13px}.locate-close{width:36px;height:36px;border:0;border-radius:50%;background:#F1F3F7;color:#1E2433;font:24px/1 "DM Sans",sans-serif;cursor:pointer}.locate-map{height:min(62vh,520px);min-height:320px;background:#e5ece8}.locate-readout{display:flex;flex-wrap:wrap;gap:10px 24px;padding:14px 22px;border-top:1px solid #E4E8EE;font-size:14px}.locate-readout strong{font-variant-numeric:tabular-nums}.locate-sample{color:#8A5300;font-size:12px}
+.boat-status{background:#fff}.boat-status-inner{max-width:1200px;margin:0 auto;padding:52px 24px 64px}.boat-status-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:22px}.boat-status-head h2{margin:0;font:600 32px Manrope,sans-serif;letter-spacing:-.02em}.boat-status-head p{margin:6px 0 0;color:#6B7280;font-size:15px}.boat-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.boat-status-card{min-width:0;padding:20px;background:#fff;border:1px solid #E4E8EE;border-radius:14px;box-shadow:0 1px 3px #1e24330c}.boat-status-card h3{margin:0;font:700 18px Manrope,sans-serif}.boat-status-card>p{margin:4px 0 14px;color:#6B7280;font-size:13px}.boat-chart{display:block;width:100%;height:auto}.boat-chart text{fill:#78827e;font:12px "DM Sans",sans-serif}.boat-chart .grid{stroke:#E5EBE8;stroke-width:1}.boat-chart .temp-line{fill:none;stroke:#28745E;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.boat-chart .humidity-line{fill:none;stroke:#3984A0;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.boat-chart .temp-dot{fill:#28745E;stroke:#fff;stroke-width:2}.boat-chart .humidity-dot{fill:#3984A0;stroke:#fff;stroke-width:2}.boat-status-legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:10px;color:#53615b;font-size:12px}.boat-status-legend span{display:inline-flex;align-items:center;gap:7px}.legend-dot{width:9px;height:9px;border-radius:50%;background:#28745E}.legend-dot.humidity{background:#3984A0}.movement-track{position:relative;margin:16px 4px 8px;height:42px;border-radius:8px;background:repeating-linear-gradient(90deg,#edf1ef 0,#edf1ef calc(25% - 1px),#dfe6e2 calc(25% - 1px),#dfe6e2 25%)}.movement-active{position:absolute;top:0;height:42px;border-radius:7px;background:#DDF1E5;border:1px solid #9AC9AA}.movement-active::after{content:"";position:absolute;top:50%;left:50%;width:10px;height:10px;border-radius:50%;background:#32834D;transform:translate(-50%,-50%);box-shadow:0 0 0 4px #32834d20}.movement-times{display:flex;justify-content:space-between;margin:0 2px;color:#78827e;font-size:11px}.movement-events{display:grid;gap:0;margin-top:18px}.movement-event{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #EEF1EF;font-size:13px}.movement-event time{min-width:54px;color:#6B7280;font-variant-numeric:tabular-nums}.movement-event strong{font-weight:600}.movement-caption{margin:14px 0 0;color:#8A5300;font-size:12px}.movement-card{display:flex;flex-direction:column}.movement-card .movement-chart-area{flex:1}
+@media(max-width:720px){.boat-status-inner{padding:40px 20px 48px}.boat-status-grid{grid-template-columns:1fr}.boat-status-head h2{font-size:28px}}
+</style>
 </head>
 <body>
-  <header class="hero"><div class="wrap">
-    <nav class="nav"><a class="brand" href="index.html">KISERO</a><a href="#logbook">Sailing log</a></nav>
-    <span class="eyebrow">Boat logbook</span><h1>S/Y KISERO</h1>
-    <p>Beneteau First 27 SE · CRO 2882 · Home port: Puerto Banús, Spain</p>
-    <p id="data-status" role="status">Checking recorded boat data…</p>
-  </div></header>
-  <main class="wrap">
-    <div class="section-head"><div><h2 id="logbook">Recorded sailing</h2><p>Trips are detected from boat instrument logs when the boat is underway.</p></div><a class="button" href="logbook.html">Open logbook →</a></div>
-    <article class="summary" id="latest"><h3>Loading the latest trip…</h3><p class="muted">Trip summaries and tracks come from the boat log archive.</p></article>
-    <div class="section-head"><div><h2>Sensor coverage</h2><p>Only measurements present in the source log will appear here.</p></div></div>
-    <div class="sensor-grid">
-      <article class="sensor"><h3>Navigation and sailing data</h3><p>GPS position, speed, heading, depth, wind, and water temperature can be shown when included in an uploaded Yacht Devices log.</p></article>
-      <article class="sensor"><h3>Cabin conditions</h3><p>Cabin temperature and humidity sensors are not reporting yet, so those readings are currently unavailable.</p></article>
+<div style="font-family: inherit; color: #1E2433; background: #FFFFFF; min-height: 100vh">
+
+
+  <section id="status" style="background: #111111; color: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 56px 24px; display: flex; flex-wrap: wrap; gap: 48px; align-items: center">
+      <div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+
+          <div style="display: inline-flex; align-self: flex-start; align-items: center; gap: 10px; padding: 8px 16px 8px 12px; border-radius: 999px; background: #FFFFFF29; border: 1px solid #FFFFFF80">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 4px #FFFFFF29"></span>
+            <span id="latest-status" style="font-weight: 600; font-size: 15px">Loading latest sail…</span>
+            <span id="latest-status-detail" style="font-size: 14px; color: #C4C4C4">Boat data is loading</span>
+            <button id="locate-open" type="button" style="padding: 0; border: 0; background: transparent; color: #FFFFFF; font: 600 14px 'DM Sans',sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Locate</button>
+          </div>
+
+
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <h1 style="margin: 0; font-size: 72px; line-height: 1; font-weight: 800; letter-spacing: 0.02em; font-style: italic">KISERO</h1>
+          <p style="margin: 0; font-size: 20px; color: #C4C4C4; font-weight: 300">Beneteau First 27 SE · sailing out of Puerto Banús, Spain</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px">
+          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px; color: #C4C4C4">Wind speed (TWS)</span>
+            <span class="metric" style="font-size: 28px; font-weight: 600">14 kn</span>
+            <span style="font-size:12px;color:#C4C4C4">Sample value</span>
+          </div>
+          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px; color: #C4C4C4">Wind direction (TWD)</span>
+            <span class="metric" style="font-size: 28px; font-weight: 600; display: flex; align-items: center; gap: 10px">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate(125deg)"><path d="M12 3v18"></path><path d="M6 15l6 6 6-6"></path></svg>
+              NW 305°
+            </span>
+            <span style="font-size:12px;color:#C4C4C4">Sample value</span>
+          </div>
+          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px; color: #C4C4C4">Cabin temp</span>
+            <span class="metric" style="font-size: 28px; font-weight: 600">21.4 °C</span>
+            <span style="font-size:12px;color:#C4C4C4">Sample value</span>
+          </div>
+          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px; color: #C4C4C4">Humidity</span>
+            <span class="metric" style="font-size: 28px; font-weight: 600">64 %</span>
+            <span style="font-size:12px;color:#C4C4C4">Sample value</span>
+          </div>
+          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px; color: #C4C4C4">Sea temp</span>
+            <span class="metric" style="font-size: 28px; font-weight: 600">19.8 °C</span>
+            <span style="font-size:12px;color:#C4C4C4">Sample value</span>
+          </div>
+        </div>
+        <p style="margin: 0; font-size: 13px; color: #C4C4C4">Sample sensor values are placeholders until onboard telemetry is available</p>
+      </div>
     </div>
-  </main>
-  <footer class="footer"><div class="wrap">Kisero · Exact public tracks are shown in the sailing log.</div></footer>
-  <script>
-    const API="https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
-    const status=document.querySelector("#data-status"), latest=document.querySelector("#latest");
-    const dateText=value=>{const [day,time=""]=value.split("T");return new Date(`${day}T00:00:00Z`).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"})+(time?` at ${time.slice(0,5)}`:"");};
-    fetch(`${API}/v1/trips`).then(r=>{if(!r.ok)throw new Error("Trip data is temporarily unavailable.");return r.json()}).then(data=>{
-      const trips=data.trips||[];
-      if(!trips.length){status.textContent="No boat trips have been uploaded yet.";latest.innerHTML='<h3>No recorded trips yet</h3><p class="muted">The logbook will fill in after the first Yacht Devices export is uploaded.</p>';return;}
-      status.textContent=`${trips.length} recorded sailing ${trips.length===1?"session":"sessions"}`;
-      const trip=trips[0];latest.innerHTML=`<h3>Latest trip · ${dateText(trip.start)}</h3><p class="muted">${dateText(trip.start)} – ${dateText(trip.end)}</p><div class="metrics"><span class="metric"><strong>${trip.distanceNm} nm</strong>Distance</span><span class="metric"><strong>${trip.averageSogKn} kn</strong>Average speed</span><span class="metric"><strong>${trip.maxSogKn} kn</strong>Top speed</span><span class="metric"><strong>${trip.pointCount}</strong>GPS points</span></div><p><a href="logbook.html">View exact track and all trips →</a></p>`;
-    }).catch(error=>{status.classList.add("error");status.textContent=error.message;latest.innerHTML='<h3>Boat data is temporarily unavailable</h3><p class="muted">Please try the logbook again shortly.</p>';});
-  </script>
+  </section>
+
+  <dialog class="locate-dialog" id="locate-dialog" aria-labelledby="locate-title">
+    <div class="locate-head"><div><h2 id="locate-title">KISERO position</h2><p class="locate-sample">Latest logged GPS position will appear here when available</p></div><button class="locate-close" type="button" aria-label="Close map">×</button></div>
+    <div id="locate-map" class="locate-map" role="application" aria-label="Map showing sample boat position near Marbella"></div>
+    <div class="locate-readout"><span>Coordinates <strong id="boat-coordinates">—</strong></span><span>Heading <strong>—</strong></span><span>Speed <strong id="boat-speed">—</strong></span></div>
+  </dialog>
+
+  <section id="contact" style="border-bottom: 1px solid #E4E8EE; background: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 24px; display: flex; flex-wrap: wrap; gap: 32px; align-items: center; justify-content: space-between">
+      <dl style="margin: 0; display: flex; flex-wrap: wrap; gap: 32px">
+        <div style="display: flex; flex-direction: column; gap: 4px"><dt style="font-size: 12px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em">Sailboat</dt><dd style="margin: 0; font-size: 16px; font-weight: 500">Beneteau First 27 SE</dd></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><dt style="font-size: 12px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em">Sail no.</dt><dd style="margin: 0; font-size: 16px; font-weight: 500">CRO 2882</dd></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><dt style="font-size: 12px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em">Call sign</dt><dd style="margin: 0; font-size: 16px; font-weight: 500">9A2816</dd></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><dt style="font-size: 12px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em">Home port</dt><dd style="margin: 0; font-size: 16px; font-weight: 500">Puerto Banús, Spain</dd></div>
+      </dl>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <a href="https://www.instagram.com/kiserock/"style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid #CBD2DB; border-radius: 8px; text-decoration: none; color: #1E2433; font-size: 15px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"></circle></svg>
+          @kiserock
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: #F4F4F4">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 40px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
+      <div style="background: #FFFFFF; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(30,36,51,0.08); display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #6B7280">Season 2026 · distance</span><span class="metric" id="season-distance" style="font-size: 32px; font-weight: 600">—</span></div>
+      <div style="background: #FFFFFF; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(30,36,51,0.08); display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #6B7280">Time under way</span><span class="metric" id="season-duration" style="font-size: 32px; font-weight: 600">—</span></div>
+      <div style="background: #FFFFFF; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(30,36,51,0.08); display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #6B7280">Trips logged</span><span class="metric" id="season-trips" style="font-size: 32px; font-weight: 600">—</span></div>
+      <div style="background: #FFFFFF; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(30,36,51,0.08); display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #6B7280">Top speed (SOG)</span><span class="metric" id="season-speed" style="font-size: 32px; font-weight: 600">—</span></div></div>
+  </section>
+
+  <section id="trips" style="background: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 64px 24px 32px; display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <h2 style="margin: 0; font-size: 32px; font-weight: 600; letter-spacing: -0.01em">Sailing log</h2>
+          <p style="margin: 0; font-size: 15px; color: #6B7280">Trips recorded from the boat log. Open the logbook for the exact GPS track.</p>
+        </div>
+        <div role="group" aria-label="Season" style="display: flex; gap: 4px; padding: 4px; background: #F1F3F7; border-radius: 10px">
+          <button type="button" style="min-height: 40px; padding: 0 16px; border: 0; border-radius: 8px; background: #FFFFFF; color: #1E2433; font: inherit; font-size: 14px; font-weight: 500; box-shadow: 0 1px 2px rgba(30,36,51,0.1)">2026</button>
+          <button type="button" style="min-height: 40px; padding: 0 16px; border: 0; border-radius: 8px; background: transparent; color: #4B5563; font: inherit; font-size: 14px">2025</button>
+          <button type="button" style="min-height: 40px; padding: 0 16px; border: 0; border-radius: 8px; background: transparent; color: #4B5563; font: inherit; font-size: 14px">All</button>
+        </div>
+      </div>
+      <div style="overflow-x: auto; border: 1px solid #E4E8EE; border-radius: 12px">
+        <table style="width: 100%; min-width: 900px; border-collapse: collapse; font-size: 14px">
+          <thead>
+            <tr style="background: #F8FAFC; text-align: left">
+              <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE">Date</th>
+              <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE">Route</th>
+              <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Distance</th>
+              <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Duration</th>
+              <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Avg / max SOG</th>
+              <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Avg / max TWS</th>
+              <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE">Wind</th>
+              <th scope="col" style="padding: 12px 16px; border-bottom: 1px solid #E4E8EE"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Details</span></th>
+            </tr>
+          </thead>
+          <tbody id="trip-rows"><tr><td colspan="8" style="padding:16px;color:#6B7280">Loading recorded trips…</td></tr></tbody>
+        </table>
+      </div>
+      <p style="margin: -14px 0 0; font-size: 13px; color: #6B7280">Wind readings marked “Sample” are placeholders; the uploaded log does not include wind values in the public summary.</p>
+    </div>
+  </section>
+
+  <section class="boat-status" aria-labelledby="boat-status-title">
+    <div class="boat-status-inner">
+      <div class="boat-status-head"><div><h2 id="boat-status-title">Boat Status</h2><p>Cabin conditions and movement sensor activity over time.</p></div></div>
+      <div class="boat-status-grid">
+        <article class="boat-status-card">
+          <h3>Temperature and humidity</h3>
+          <p>Illustrative sample readings · replace when cabin sensors are reporting</p>
+          <svg class="boat-chart" viewBox="0 0 640 260" role="img" aria-label="Illustrative chart: cabin temperature rises from 20.8 to 21.4 degrees Celsius and humidity varies from 62 to 65 percent between 09:00 and 12:00">
+            <line class="grid" x1="56" y1="30" x2="584" y2="30"/><line class="grid" x1="56" y1="82" x2="584" y2="82"/><line class="grid" x1="56" y1="134" x2="584" y2="134"/><line class="grid" x1="56" y1="186" x2="584" y2="186"/>
+            <text x="10" y="34">22°C</text><text x="10" y="86">21.5</text><text x="10" y="138">21</text><text x="10" y="190">20.5</text>
+            <text x="592" y="34">68%</text><text x="592" y="86">66</text><text x="592" y="138">64</text><text x="592" y="190">62</text>
+            <polyline class="temp-line" points="56,155 144,145 232,124 320,134 408,103 496,93 584,103"/><polyline class="humidity-line" points="56,186 144,155 232,165 320,134 408,145 496,124 584,155"/>
+            <circle class="temp-dot" cx="56" cy="155" r="4"/><circle class="temp-dot" cx="144" cy="145" r="4"/><circle class="temp-dot" cx="232" cy="124" r="4"/><circle class="temp-dot" cx="320" cy="134" r="4"/><circle class="temp-dot" cx="408" cy="103" r="4"/><circle class="temp-dot" cx="496" cy="93" r="4"/><circle class="temp-dot" cx="584" cy="103" r="4"/>
+            <circle class="humidity-dot" cx="56" cy="186" r="4"/><circle class="humidity-dot" cx="144" cy="155" r="4"/><circle class="humidity-dot" cx="232" cy="165" r="4"/><circle class="humidity-dot" cx="320" cy="134" r="4"/><circle class="humidity-dot" cx="408" cy="145" r="4"/><circle class="humidity-dot" cx="496" cy="124" r="4"/><circle class="humidity-dot" cx="584" cy="155" r="4"/>
+            <text x="48" y="220">09:00</text><text x="214" y="220">10:00</text><text x="390" y="220">11:00</text><text x="552" y="220">12:00</text>
+          </svg>
+          <div class="boat-status-legend"><span><i class="legend-dot"></i>Temperature · °C</span><span><i class="legend-dot humidity"></i>Humidity · %</span></div>
+        </article>
+        <article class="boat-status-card movement-card">
+          <h3>Movement sensor</h3>
+          <p>Illustrative sample events · no movement sensor data has been uploaded</p>
+          <div class="movement-chart-area">
+            <div class="movement-track" aria-label="Movement sensor activation timeline from 09:00 to 12:00"><span class="movement-active" style="left:12%;width:5%"></span><span class="movement-active" style="left:39%;width:4%"></span><span class="movement-active" style="left:67%;width:7%"></span><span class="movement-active" style="left:88%;width:3%"></span></div>
+            <div class="movement-times"><span>09:00</span><span>10:00</span><span>11:00</span><span>12:00</span></div>
+            <div class="movement-events"><div class="movement-event"><i></i><time>09:22</time><strong>Movement detected</strong></div><div class="movement-event"><i></i><time>10:10</time><strong>Movement detected</strong></div><div class="movement-event"><i></i><time>11:01</time><strong>Movement detected</strong></div><div class="movement-event"><i></i><time>11:38</time><strong>Movement detected</strong></div></div>
+          </div>
+          <p class="movement-caption">Illustrative sample values shown as placeholders.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+  <footer style="background: #111111; color: #C4C4C4">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 28px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px">
+      <span>kisero.org · First 27 SE · CRO 2882</span>
+      <span>NMEA 2000 data obtained using <a href="https://www.yachtd.com/" target="_blank" rel="noopener noreferrer">YachtDevice</a></span>
+    </div>
+  </footer>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(()=>{
+  const API="https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
+  const rows=document.getElementById('trip-rows');
+  const status=document.getElementById('latest-status');
+  const detail=document.getElementById('latest-status-detail');
+  let boatPosition=null, map=null, boatMarker=null;
+  const fmtDate=value=>{const [day,time=""]=value.split('T');return new Date(`${day}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})+(time?` · ${time.slice(0,5)}`:'')};
+  const duration=(start,end)=>{const a=new Date(`${start}Z`),b=new Date(`${end}Z`),mins=Math.max(0,Math.round((b-a)/60000));return `${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`};
+  const cell=(text,styles='')=>{const td=document.createElement('td');td.textContent=text;td.style.cssText=`padding:14px 16px;border-bottom:1px solid #E4E8EE;${styles}`;return td};
+  fetch(`${API}/v1/trips`).then(response=>{if(!response.ok)throw new Error('Trip data is temporarily unavailable.');return response.json()}).then(async payload=>{
+    const trips=payload.trips||[];
+    if(!trips.length){status.textContent='No recorded sail yet';detail.textContent='The boat log will appear here after its first upload';rows.innerHTML='<tr><td colspan="8" style="padding:16px;color:#6B7280">No sailing sessions recorded yet.</td></tr>';return;}
+    const latest=trips[0];
+    status.textContent=`Latest recorded sail · ${fmtDate(latest.start)}`;
+    detail.textContent=`${latest.averageSogKn} kn average · ${latest.maxSogKn} kn top speed`;
+    document.getElementById('season-distance').textContent=`${trips.reduce((sum,trip)=>sum+Number(trip.distanceNm||0),0).toFixed(1)} nm`;
+    const underwayMinutes=trips.reduce((sum,trip)=>sum+Math.max(0,Math.round((new Date(`${trip.end}Z`)-new Date(`${trip.start}Z`))/60000)),0);document.getElementById('season-duration').textContent=`${Math.floor(underwayMinutes/60)} h ${String(underwayMinutes%60).padStart(2,'0')} m`;
+    document.getElementById('season-trips').textContent=String(trips.length);
+    document.getElementById('season-speed').textContent=`${Math.max(...trips.map(trip=>Number(trip.maxSogKn||0))).toFixed(1)} kn`;
+    rows.replaceChildren();
+    for(const trip of trips){
+      const tr=document.createElement('tr');
+      tr.append(cell(fmtDate(trip.start),'white-space:nowrap;color:#4B5563'));
+      const route=cell('Recorded sailing session','font-weight:500');const routeLink=document.createElement('a');routeLink.href='logbook.html';routeLink.textContent='Recorded sailing session';routeLink.style.cssText='color:#1E2433;text-decoration:none';route.replaceChildren(routeLink);tr.append(route);
+      tr.append(cell(`${Number(trip.distanceNm).toFixed(2)} nm`,'text-align:right;font-variant-numeric:tabular-nums'));
+      tr.append(cell(duration(trip.start,trip.end),'text-align:right;font-variant-numeric:tabular-nums'));
+      tr.append(cell(`${Number(trip.averageSogKn).toFixed(1)} / ${Number(trip.maxSogKn).toFixed(1)} kn`,'text-align:right;font-variant-numeric:tabular-nums'));
+      tr.append(cell('— / — kn','text-align:right;font-variant-numeric:tabular-nums'));
+      const wind=cell('Sample','');const badge=document.createElement('span');badge.textContent='Sample';badge.title='Wind direction is a placeholder; the public trip summary has no wind data.';badge.style.cssText='display:inline-block;padding:3px 10px;border-radius:999px;background:#EEEEEE;color:#555;font-size:13px';wind.replaceChildren(badge);tr.append(wind);
+      const action=cell('','text-align:right');const link=document.createElement('a');link.href='logbook.html';link.textContent='Details →';link.style.cssText='display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border-radius:8px;color:#111;text-decoration:none;font-weight:500;white-space:nowrap';action.append(link);tr.append(action);rows.append(tr);
+    }
+    const response=await fetch(`${API}/v1/trips/${encodeURIComponent(latest.id)}`);
+    if(response.ok){const tripData=await response.json(),point=tripData.track?.[0];if(point){const lat=Number(point[1]),lon=Number(point[0]);boatPosition=[lat,lon];document.getElementById('boat-coordinates').textContent=`${Math.abs(lat).toFixed(4)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(4)}° ${lon>=0?'E':'W'}`;document.querySelector('.locate-sample').textContent='First GPS position in the latest recorded track';document.getElementById('boat-speed').textContent=`${latest.averageSogKn} kn avg`;if(map&&boatMarker){boatMarker.setLatLng(boatPosition);map.setView(boatPosition,13);}}}
+  }).catch(error=>{status.textContent='Boat data temporarily unavailable';detail.textContent=error.message;rows.innerHTML='<tr><td colspan="8" style="padding:16px;color:#8A5300">Trip summaries could not be loaded. Try the sailing log again shortly.</td></tr>';});
+  const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Latest sailing area').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
+})();
+</script>
 </body>
 </html>
