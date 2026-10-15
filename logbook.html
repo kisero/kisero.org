@@ -1,52 +1,147 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111916"><title>Sailing log — Kisero</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111916">
+  <title>Kisero — sailing logbook</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <style>
-    :root{--ink:#17211f;--muted:#66736f;--line:#e3e9e6;--wash:#f4f7f5;--green:#19664f}*{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:15px/1.5 "DM Sans",sans-serif}.top{background:#111916;color:white}.wrap{width:min(1000px,calc(100% - 36px));margin:auto}.top .wrap{padding:22px 0 32px}.nav{display:flex;justify-content:space-between;margin-bottom:35px}.nav a{color:#d0d9d4;text-decoration:none}.brand{font:italic 800 20px Manrope,sans-serif}.eyebrow{color:#9ec9b8;text-transform:uppercase;letter-spacing:.13em;font-size:11px;font-weight:700}.top h1{font:700 clamp(32px,6vw,48px)/1.1 Manrope,sans-serif;margin:5px 0}.top p{color:#c4d0ca}.main{padding:28px 0 64px}.status,.trip{background:white;border:1px solid var(--line);border-radius:15px;padding:20px;margin-bottom:14px}.status{color:var(--muted)}.trip h2{font:700 19px Manrope,sans-serif;margin:0 0 8px}.meta{color:var(--muted);font-size:13px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.actions a{color:var(--green);font-weight:600}.map{height:360px;border-radius:11px;border:1px solid var(--line);margin-top:15px}.track-note{font-size:12px;color:var(--muted)}.footer{background:#111916;color:#aebbb4;padding:22px 0;font-size:12px}
+    :root{color-scheme:light;--ink:#17211f;--muted:#66736f;--line:#e3e9e6;--paper:#fff;--wash:#f4f7f5;--green:#19664f;--mint:#e8f3ee;--blue:#347b96;--shadow:0 12px 32px rgba(24,43,36,.06)}
+    *{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:15px/1.5 "DM Sans",sans-serif}a{color:inherit}
+    .top{background:#111916;color:#fff}.top-inner,.main,.footer-inner{width:min(1100px,calc(100% - 40px));margin:auto}.top-inner{padding:24px 0 36px}.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:38px}.back{color:#d0d9d4;text-decoration:none;font-size:14px}.brand{font:italic 800 20px Manrope,sans-serif;letter-spacing:.02em;text-decoration:none}.eyebrow{margin:0 0 8px;color:#9ec9b8;text-transform:uppercase;letter-spacing:.13em;font-size:11px;font-weight:700}.title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}.title{margin:0;font:700 clamp(30px,5vw,46px)/1.1 Manrope,sans-serif;letter-spacing:-.04em}.date{margin:10px 0 0;color:#c4d0ca}.tag{border:1px solid #43534b;padding:8px 12px;border-radius:99px;color:#dce8e1;font-size:13px;white-space:nowrap}
+    .main{padding:28px 0 64px;display:grid;gap:22px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card,.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.stat{padding:17px 18px}.label{display:block;color:var(--muted);font-size:12px}.value{display:block;margin-top:5px;font:700 clamp(20px,2.5vw,27px)/1.2 Manrope,sans-serif;letter-spacing:-.03em}.unit{font:500 13px "DM Sans",sans-serif;color:var(--muted);letter-spacing:0}.panel{padding:22px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.panel h2{margin:0;font:700 19px Manrope,sans-serif;letter-spacing:-.02em}.sub{margin:5px 0 0;color:var(--muted);font-size:13px}
+    .map-frame{position:relative;overflow:hidden;height:clamp(350px,48vw,520px);border:1px solid var(--line);border-radius:13px;background:#e5ece8}.leaflet-map{position:absolute;inset:0;background:#e5ece8}.map-speed-scale{width:126px;height:7px;border-radius:99px;background:linear-gradient(90deg,#347b96 0%,#19664f 42%,#d09b36 72%,#d45b35 100%)}.map-legend small{color:var(--muted);font-size:10px}.map-legend{position:absolute;z-index:500;left:14px;bottom:14px;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:9px;background:#fff;font-size:12px;box-shadow:0 3px 12px #10231d24}.map-caption{margin:10px 0 0;color:var(--muted);font-size:12px}.leaflet-popup-content{font:13px/1.5 "DM Sans",sans-serif}.track-popup-time{font-weight:700;margin-bottom:8px}.track-popup-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px}.track-popup-grid span{color:var(--muted)}.track-popup-grid strong{text-align:right}.photo-marker-icon{background:transparent;border:0}.photo-camera{display:grid;place-items:center;width:22px;height:22px;border:2px solid #fff;border-radius:50%;background:var(--green);color:#fff;box-shadow:0 1px 5px #10231d80;cursor:pointer}.photo-camera svg{width:12px;height:12px}.photo-modal{padding:0;width:auto;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);border:0;background:transparent;overflow:visible;box-shadow:none}.photo-modal::backdrop{background:#07100dcc}.photo-modal-content{position:relative;display:grid;place-items:center;background:transparent}.photo-modal-image{display:block;width:auto;height:auto;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);object-fit:contain;border-radius:8px}.photo-close{position:absolute;z-index:1;top:10px;right:10px;width:36px;height:36px;border:0;border-radius:50%;background:#111916d9;color:#fff;font:400 24px/1 "DM Sans",sans-serif;cursor:pointer}.photo-close:hover{background:#111916}
+    .charts{display:grid;gap:12px}.chart-card{position:relative;border:1px solid var(--line);border-radius:12px;padding:0 18px;min-width:0;overflow:hidden}.chart-title{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:58px;font-weight:600;font-size:14px;cursor:pointer;list-style:none}.chart-title::-webkit-details-marker{display:none}.chart-title::after{content:"+";display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:var(--wash);color:var(--muted);font-size:17px;font-weight:400}.chart-card[open] .chart-title::after{content:"−"}.chart-title small{font-size:12px;color:var(--muted);font-weight:400;margin-left:auto}.chart-card .chart{padding-bottom:12px}.chart{width:100%;height:220px;display:block;margin-top:8px}.axis{stroke:#e6ece9;stroke-width:1}.chart-label{fill:#75817c;font:11px "DM Sans",sans-serif}.chart-tooltip{position:absolute;z-index:5;display:none;max-width:calc(100% - 24px);padding:8px 10px;border-radius:8px;background:#17211f;color:#fff;box-shadow:0 4px 12px #10231d2e;font-size:12px;white-space:nowrap;pointer-events:none}.chart-path{fill:none;stroke:var(--green);stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}.chart-path.blue{stroke:var(--blue)}.chart-path.orange{stroke:#c37a31}.chart-path.purple{stroke:#7660a8}.chart-path.rose{stroke:#b05b68}.chart-path.teal{stroke:#238b84}.chart-empty{fill:var(--muted);font:13px "DM Sans",sans-serif}.chart-content{padding:0 0 14px}.metric-selector{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px;padding:0;border:0}.metric-selector label{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--muted);font-size:12px;cursor:pointer}.metric-selector input{accent-color:var(--green);margin:0}.metric-selector label:has(input:checked){border-color:#a9cbbd;background:var(--mint);color:var(--ink)}.chart-wrap{position:relative}.chart-wrap .chart{margin-top:0}.chart-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:4px}.legend-item{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:12px}.legend-swatch{width:9px;height:9px;border-radius:50%}.chart-tooltip span{display:block}.chart-tooltip .tooltip-heading{font-weight:700;margin-bottom:3px}
+    .download{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 18px;border:1px solid #d8e6de;border-radius:14px;background:#eef6f1}.download h2{margin:0;font:700 15px Manrope,sans-serif}.download p{margin:3px 0 0;color:var(--muted);font-size:12px}.download a{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:9px;background:var(--green);color:#fff;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap}.download a:hover{background:#124d3b}
+    .bottom-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}.conditions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.condition{padding:13px;border-radius:11px;background:var(--wash)}.condition .value{font-size:19px}.note{margin:15px 0 0;padding:12px 14px;border-radius:10px;background:var(--mint);color:#315e4e;font-size:12px}.readings{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.reading{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px}.reading dt{color:var(--muted)}.reading dd{margin:0;font-weight:600;text-align:right}.footer{background:#111916;color:#aebbb4}.footer-inner{padding:22px 0;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px}
+    @media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bottom-grid{grid-template-columns:1fr}.title-row{align-items:flex-start;flex-direction:column}.tag{align-self:flex-start}.chart{height:190px}}
+    @media(max-width:480px){.top-inner,.main,.footer-inner{width:min(100% - 28px,1100px)}.top-inner{padding-top:18px}.nav{margin-bottom:28px}.panel{padding:16px}.stat{padding:14px}.readings{grid-template-columns:1fr}.download{align-items:flex-start;flex-direction:column}.map-frame{height:370px}.chart-card{padding:14px 12px}.chart{height:175px}}
   </style>
 </head>
-<body><header class="top"><div class="wrap"><nav class="nav"><a href="index.html">← Home</a><a class="brand" href="index.html">KISERO</a></nav><span class="eyebrow">Boat logbook</span><h1>Sailing sessions</h1><p>Recorded trips, GPS tracks, and speeds from the boat log. Exact coordinates are public.</p></div></header>
-<main class="wrap main"><div id="status" class="status" role="status">Loading recorded sessions…</div><p class="track-note">Times are shown as recorded; the export does not specify a timezone. Cabin temperature and humidity are unavailable until those sensors report.</p><div id="trips"></div></main><footer class="footer"><div class="wrap">Kisero · Exact tracks are published for public viewing.</div></footer>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script>
-const API_BASE = "https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
-const params = new URLSearchParams(location.search);
-const DEMO = params.get("demo") === "1";
-const root = DEMO ? "preview-data" : API_BASE;
-const tripsRoot = document.querySelector("#trips");
-const statusBox = document.querySelector("#status");
-const niceTime = value => {const [date,time=""]=value.split("T");return new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"})+(time?`, ${time.slice(0,5)}`:"");};
-async function start(){
-  try{
-    if(!DEMO && API_BASE.startsWith("__")) throw new Error("The public logbook is not connected yet.");
-    const indexResponse=await fetch(`${root}/v1/trips`.replace("preview-data/v1/trips","preview-data/index.json"));
-    if(!indexResponse.ok)throw new Error("Trip summaries could not be loaded.");
-    const index = await indexResponse.json();
-    const items = index.trips || [];
-    statusBox.textContent = items.length ? `${items.length} underway session${items.length===1?"":"s"} · exact tracks shown` : "No sessions have been recorded yet.";
-    for(const trip of items){
-      const article=document.createElement("article");article.className="trip";
-      const title=document.createElement("h2");title.textContent=niceTime(trip.start);
-      const meta=document.createElement("div");meta.className="meta";meta.textContent=`${niceTime(trip.start)} – ${niceTime(trip.end)} · ${trip.pointCount} points · ${trip.distanceNm} nm · avg ${trip.averageSogKn} kn · max ${trip.maxSogKn} kn`;
-      const map=document.createElement("div");map.className="map";map.setAttribute("aria-label","Exact public GPS track");
-      const detail=DEMO?`${root}/${trip.id}.json`:`${root}/v1/trips/${encodeURIComponent(trip.id)}`;
-      const note=document.createElement("p");note.className="track-note";note.textContent="Exact GPS track · Map © OpenStreetMap contributors · "
-      const download=document.createElement("a");download.href=detail;download.textContent="Download exact track data (JSON)";download.target="_blank";download.rel="noopener";download.style.color="var(--green)";download.style.fontWeight="600";note.append(download);
-      article.append(title,meta,map,note);tripsRoot.append(article);
-      const dataResponse=await fetch(detail);if(!dataResponse.ok)throw new Error("A trip track could not be loaded.");
-      const data=await dataResponse.json();
-      if(!Array.isArray(data.track)||!data.track.length)throw new Error("A trip has no GPS points to display.");
-      const points=data.track.map(p=>[p[1],p[0]]);
-      const leaflet=L.map(map,{scrollWheelZoom:false}).setView(points[0],12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap contributors",maxZoom:19}).addTo(leaflet);
-      const line=L.polyline(points,{color:"#19664f",weight:4}).addTo(leaflet);L.circleMarker(points[0],{radius:5,color:"#19664f"}).addTo(leaflet);L.circleMarker(points.at(-1),{radius:5,color:"#bd5739"}).addTo(leaflet);leaflet.fitBounds(line.getBounds(),{padding:[18,18]});
-    }
-  }catch(error){statusBox.textContent=`${error.message} This preview can be reviewed locally before publication.`;}
-}
-start();
-</script></body></html>
+<body>
+  <header class="top"><div class="top-inner">
+    <nav class="nav" aria-label="Main navigation"><a class="back" href="index.html">← Home</a><a class="brand" href="index.html">KISERO</a></nav>
+    <p class="eyebrow">Sailing logbook · recorded trips</p>
+    <div class="title-row"><div><h1 class="title" id="trip-date">Loading sailing session…</h1><p class="date" id="trip-range">Loading recorded data…</p></div><span class="tag" id="trip-count">Loading trips…</span></div>
+  </div></header>
+  <main class="main">
+    <section class="stats" aria-label="Session summary">
+      <article class="card stat"><span class="label">GPS distance estimate</span><span class="value" id="stat-distance">— <span class="unit">nm</span></span></article>
+      <article class="card stat"><span class="label">Recorded duration</span><span class="value" id="stat-duration">—</span></article>
+      <article class="card stat"><span class="label">Avg / max SOG</span><span class="value" id="stat-sog">— / — <span class="unit">kn</span></span></article>
+      <article class="card stat"><span class="label">Avg / max TWS</span><span class="value">— / — <span class="unit">kn</span></span><span class="label">Sample placeholder · wind summary unavailable</span></article>
+    </section>
+
+    <section class="panel" aria-labelledby="track-title">
+      <div class="panel-head"><div><h2 id="track-title">GPS track</h2><p class="sub">The recorded GPS trace, colored by speed over ground. Exact coordinates are public.</p></div></div>
+      <div class="map-frame">
+        <div id="track-map" class="leaflet-map" role="application" aria-label="Interactive sailing track map"></div>
+        <div class="map-legend"><span>GPS track · SOG</span><small>0 kn</small><div class="map-speed-scale" aria-hidden="true"></div><small>8+ kn</small></div>
+      </div>
+      <p class="map-caption">Click the track to inspect recorded speed. Wind readings are shown as sample placeholders because the public trip feed only includes GPS and speed. Map data © OpenStreetMap contributors.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="charts-title">
+      <div class="panel-head"><div><h2 id="charts-title">Sailing data</h2><p class="sub">Choose readings to compare · 5-minute averages. GPS speed is available; other channels use sample placeholders.</p></div></div>
+      <div class="charts">
+        <details class="chart-card">
+          <summary class="chart-title"><span>Speed and wind speed</span><small>knots</small></summary>
+          <div class="chart-content"><fieldset class="metric-selector" aria-label="Speed and wind speed metrics">
+            <label><input type="checkbox" data-metric="SOG" checked><span>SOG</span></label>
+            <label><input type="checkbox" data-metric="TWS"><span>TWS</span></label>
+            <label><input type="checkbox" data-metric="AWS"><span>AWS</span></label>
+          </fieldset><div class="chart-wrap"><svg class="chart" data-group="speed" role="img" aria-label="Selectable speed and wind speed time series"></svg><div class="chart-tooltip" role="status" aria-live="polite"></div></div><div class="chart-legend" data-legend="speed" aria-label="Chart legend"></div></div>
+        </details>
+        <details class="chart-card">
+          <summary class="chart-title"><span>Wind and rudder angle</span><small>degrees</small></summary>
+          <div class="chart-content"><fieldset class="metric-selector" aria-label="Wind and rudder angle metrics">
+            <label><input type="checkbox" data-metric="AWA" checked><span>AWA</span></label>
+            <label><input type="checkbox" data-metric="TWA"><span>TWA</span></label>
+            <label><input type="checkbox" data-metric="Rudder"><span>Rudder Angle</span></label>
+          </fieldset><div class="chart-wrap"><svg class="chart" data-group="angle" role="img" aria-label="Selectable wind and rudder angle time series"></svg><div class="chart-tooltip" role="status" aria-live="polite"></div></div><div class="chart-legend" data-legend="angle" aria-label="Chart legend"></div></div>
+        </details>
+      </div>
+    </section>
+
+    <section class="download" aria-label="Download sailing data"><div><h2>Download recorded track</h2><p id="download-detail">Exact GPS track · JSON</p></div><a id="download-track" href="#" target="_blank" rel="noopener"><span aria-hidden="true">↓</span> Download track JSON</a></section>
+
+    <div class="bottom-grid">
+      <section class="panel" aria-labelledby="conditions-title"><div class="panel-head"><div><h2 id="conditions-title">Wind and sea</h2><p class="sub">Sample placeholders · not included in the public trip feed.</p></div></div>
+        <div class="conditions">
+          <div class="condition"><span class="label">Apparent wind · avg / peak</span><span class="value">— / — <span class="unit">kn</span></span></div>
+          <div class="condition"><span class="label">Water temperature</span><span class="value">— <span class="unit">°C</span></span></div>
+          <div class="condition"><span class="label">Depth range</span><span class="value">— <span class="unit">m</span></span></div>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="readings-title"><div class="panel-head"><div><h2 id="readings-title">Data quality</h2><p class="sub">GPS recording quality for this session.</p></div></div>
+        <dl class="readings">
+          <div class="reading"><dt>GPS points</dt><dd id="quality-points">—</dd></div>
+          <div class="reading"><dt>Typical interval</dt><dd id="quality-interval">—</dd></div>
+          <div class="reading"><dt>Long recording gaps</dt><dd id="quality-gaps">—</dd></div>
+        </dl>
+      </section>
+    </div>
+  </main>
+<footer class="footer"><div class="footer-inner"><span>KISERO · Beneteau First 27 SE</span><span>Times shown as recorded; the source file has no timezone.</span></div></footer>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+(()=>{
+  const API="https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
+  const colors={SOG:'#19664f',TWS:'#347b96',AWS:'#c37a31',AWA:'#c37a31',TWA:'#7660a8',Rudder:'#238b84'};
+  const params=new URLSearchParams(location.search);
+  const dateLabel=value=>{const [date,time='']=value.split('T');const [y,m,d]=date.split('-');return new Date(Date.UTC(+y,+m-1,+d)).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})};
+  const shortTime=value=>value?.split('T')[1]?.slice(0,5)||'—';
+  const minutes=(start,end)=>Math.max(0,Math.round((Date.parse(`${end}Z`)-Date.parse(`${start}Z`))/60000));
+  const duration=mins=>`${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`;
+  function niceGap(seconds){return seconds<60?`${Math.round(seconds)} sec`:`${Math.round(seconds/60)} min`}
+  function showError(message){document.getElementById('trip-date').textContent='Sailing data unavailable';document.getElementById('trip-range').textContent=message;document.getElementById('trip-count').textContent='Logbook';}
+  async function start(){
+    try{
+      const indexResponse=await fetch(`${API}/v1/trips`);if(!indexResponse.ok)throw new Error('Trip summaries could not be loaded.');
+      const trips=(await indexResponse.json()).trips||[];if(!trips.length){showError('No uploaded sailing sessions yet.');return;}
+      const selected=params.get('id');let trip=trips.find(item=>item.id===selected)||trips[0];
+      document.getElementById('trip-count').textContent=`${trips.length} recorded ${trips.length===1?'session':'sessions'}`;
+      if(trips.length>1){const selector=document.createElement('select');selector.setAttribute('aria-label','Choose sailing session');selector.style.cssText='margin-top:16px;padding:9px 12px;border:1px solid #43534b;border-radius:8px;background:#17211f;color:white;font:inherit';for(const item of trips){const option=document.createElement('option');option.value=item.id;option.textContent=`${dateLabel(item.start)} · ${shortTime(item.start)}`;option.selected=item.id===trip.id;selector.append(option)}selector.addEventListener('change',()=>{location.search=`?id=${encodeURIComponent(selector.value)}`});document.querySelector('.title-row').after(selector)}
+      document.getElementById('trip-date').textContent=dateLabel(trip.start);
+      document.getElementById('trip-range').textContent=`${shortTime(trip.start)}–${shortTime(trip.end)} · ${trip.pointCount} underway GPS points`;
+      document.getElementById('stat-distance').innerHTML=`${Number(trip.distanceNm).toFixed(2)} <span class="unit">nm</span>`;
+      document.getElementById('stat-duration').textContent=duration(minutes(trip.start,trip.end));
+      document.getElementById('stat-sog').innerHTML=`${Number(trip.averageSogKn).toFixed(1)} / ${Number(trip.maxSogKn).toFixed(1)} <span class="unit">kn</span>`;
+      document.getElementById('download-detail').textContent=`Exact GPS track · JSON · ${trip.pointCount} points`;
+      const detailUrl=`${API}/v1/trips/${encodeURIComponent(trip.id)}`;document.getElementById('download-track').href=detailUrl;
+      const response=await fetch(detailUrl);if(!response.ok)throw new Error('The exact GPS track could not be loaded.');
+      const data=await response.json(),points=(data.track||[]).map(row=>({lon:Number(row[0]),lat:Number(row[1]),time:row[2],SOG:Number(row[3])})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));
+      if(!points.length)throw new Error('This session has no GPS points.');
+      document.getElementById('quality-points').textContent=String(points.length);
+      const gaps=points.slice(1).map((p,i)=>(Date.parse(p.time)-Date.parse(points[i].time))/1000).filter(n=>n>60);
+      const intervals=points.slice(1).map((p,i)=>(Date.parse(p.time)-Date.parse(points[i].time))/1000).filter(n=>n>0).sort((a,b)=>a-b);
+      document.getElementById('quality-interval').textContent=intervals.length?niceGap(intervals[Math.floor(intervals.length/2)]):'—';
+      document.getElementById('quality-gaps').textContent=String(gaps.length);
+      const records=points.map(p=>({...p,ts:Date.parse(p.time)}));
+      initializeVisuals(records);
+    }catch(error){showError(error.message);}
+  }
+  function initializeVisuals(records){
+    const first=records[0].ts,last=records.at(-1).ts,bucketMs=5*60*1000,count=Math.max(1,Math.ceil((last-first)/bucketMs)+1);
+    const values={SOG:records.map(r=>r.SOG),TWS:[],AWS:[],AWA:[],TWA:[],Rudder:[]};
+    function series(key){const buckets=Array.from({length:count},()=>[]);if(values[key].length)records.forEach((r,i)=>{if(Number.isFinite(values[key][i]))buckets[Math.min(count-1,Math.floor((r.ts-first)/bucketMs))].push(values[key][i])});return buckets.map((bucket,i)=>({t:first+i*bucketMs,v:bucket.length?bucket.reduce((a,b)=>a+b,0)/bucket.length:null}))}
+    const plotted=Object.fromEntries(Object.keys(values).map(key=>[key,series(key)]));
+    function render(svg){const card=svg.closest('.chart-card'),checked=[...card.querySelectorAll('[data-metric]:checked')].map(el=>el.dataset.metric),available=checked.filter(key=>plotted[key].some(p=>p.v!==null)),legend=card.querySelector('.chart-legend'),NS='http://www.w3.org/2000/svg',w=1200,h=220,l=52,r=18,t=12,b=32,pw=w-l-r,ph=h-t-b;svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.replaceChildren();legend.replaceChildren();const add=(tag,attrs={},label)=>{const el=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);if(label)el.textContent=label;svg.append(el);return el};if(!available.length){add('text',{x:w/2,y:h/2,'text-anchor':'middle',class:'chart-empty'},'No recorded readings for these sample channels');checked.forEach(key=>{const item=document.createElement('span');item.className='legend-item';item.textContent=`${key} · sample placeholder`;legend.append(item)});return}const max=available.includes('SOG')?9:22;[0,3,6,9].forEach(v=>{const y=t+ph-v/max*ph;add('line',{x1:l,y1:y,x2:w-r,y2:y,class:'axis'});add('text',{x:l-9,y:y+4,'text-anchor':'end',class:'chart-label'},String(v))});add('text',{x:l,y:h-7,class:'chart-label'},new Date(first).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));add('text',{x:w-r,y:h-7,'text-anchor':'end',class:'chart-label'},new Date(last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));available.forEach(key=>{let d='',open=false;plotted[key].forEach(p=>{if(p.v===null){open=false;return}const x=l+(p.t-first)/(last-first||1)*pw,y=t+ph-p.v/max*ph;d+=`${open?'L':'M'}${x.toFixed(1)},${y.toFixed(1)} `;open=true});const path=add('path',{d,class:'chart-path'});path.style.stroke=colors[key];const item=document.createElement('span');item.className='legend-item';const dot=document.createElement('i');dot.className='legend-swatch';dot.style.background=colors[key];item.append(dot,document.createTextNode(`${key} · recorded`));legend.append(item)});checked.filter(key=>!available.includes(key)).forEach(key=>{const item=document.createElement('span');item.className='legend-item';item.textContent=`${key} · sample placeholder`;legend.append(item)});svg.setAttribute('aria-label',`${available.join(', ')} recorded time series`)}
+    document.querySelectorAll('.chart').forEach(svg=>render(svg));document.querySelectorAll('[data-metric]').forEach(input=>input.addEventListener('change',()=>render(input.closest('.chart-card').querySelector('.chart'))));
+    const mapNode=document.getElementById('track-map');if(!window.L){mapNode.textContent='Map library could not be loaded.';return}
+    const map=L.map(mapNode,{scrollWheelZoom:false,preferCanvas:true}).setView([records[0].lat,records[0].lon],13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);
+    const segments=L.featureGroup().addTo(map);function sogColor(value){if(value<3)return '#347b96';if(value<5)return '#19664f';if(value<7)return '#d09b36';return '#d45b35'}
+    for(let i=1;i<records.length;i++){const a=records[i-1],b=records[i];if(b.ts-a.ts>60*1000)continue;const avg=(a.SOG+b.SOG)/2,popup=`<div class="track-popup-time">${b.time.slice(11,19)}</div><div class="track-popup-grid"><span>SOG</span><strong>${avg.toFixed(1)} kn</strong><span>TWS</span><strong>Sample · —</strong><span>AWS</span><strong>Sample · —</strong></div>`;L.polyline([[a.lat,a.lon],[b.lat,b.lon]],{color:sogColor(avg),weight:6,opacity:.96,lineCap:'round',lineJoin:'round'}).addTo(segments).bindPopup(popup)}
+    const linePoints=records.map(p=>[p.lat,p.lon]);if(segments.getBounds().isValid())map.fitBounds(segments.getBounds(),{padding:[35,35],maxZoom:15});L.circleMarker(linePoints[0],{radius:5,color:'#19664f',fillOpacity:1}).addTo(map).bindPopup('Start · recorded GPS');L.circleMarker(linePoints.at(-1),{radius:5,color:'#bd5739',fillOpacity:1}).addTo(map).bindPopup('End · recorded GPS');
+  }
+  start();
+})();
+</script>
+</body>
