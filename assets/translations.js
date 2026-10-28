@@ -1481,5 +1481,11 @@ window.KiseroMessages=[
   "Final",
   "Kraj",
   "Koniec"
+ ],
+ [
+  "A JavaScript library for interactive maps",
+  "Biblioteca JavaScript para mapas interactivos",
+  "JavaScript biblioteka za interaktivne karte",
+  "Knižnica JavaScript na interaktívne mapy"
  ]
 ];
