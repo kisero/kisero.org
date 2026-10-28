@@ -18,6 +18,7 @@ a{color:inherit}
 .boat-status{background:#fff}.boat-status-inner{max-width:1200px;margin:0 auto;padding:52px 24px 64px}.boat-status-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:22px}.boat-status-head h2{margin:0;font:600 32px Manrope,sans-serif;letter-spacing:-.02em}.boat-status-head p{margin:6px 0 0;color:#6B7280;font-size:15px}.boat-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.boat-status-card{min-width:0;padding:20px;background:#fff;border:1px solid #E4E8EE;border-radius:14px;box-shadow:0 1px 3px #1e24330c}.boat-status-card h3{margin:0;font:700 18px Manrope,sans-serif}.boat-status-card>p{margin:4px 0 14px;color:#6B7280;font-size:13px}.boat-chart{display:block;width:100%;height:auto}.boat-chart text{fill:#78827e;font:12px "DM Sans",sans-serif}.boat-chart .chart-empty{fill:#6B7280;font:15px "DM Sans",sans-serif}.boat-chart .grid{stroke:#E5EBE8;stroke-width:1}.boat-chart .temp-line{fill:none;stroke:#28745E;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.boat-chart .humidity-line{fill:none;stroke:#3984A0;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.boat-chart .temp-dot{fill:#28745E;stroke:#fff;stroke-width:2}.boat-chart .humidity-dot{fill:#3984A0;stroke:#fff;stroke-width:2}.boat-status-legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:10px;color:#53615b;font-size:12px}.boat-status-legend span{display:inline-flex;align-items:center;gap:7px}.legend-dot{width:9px;height:9px;border-radius:50%;background:#28745E}.legend-dot.humidity{background:#3984A0}.movement-track{position:relative;margin:16px 4px 8px;height:42px;border-radius:8px;background:repeating-linear-gradient(90deg,#edf1ef 0,#edf1ef calc(25% - 1px),#dfe6e2 calc(25% - 1px),#dfe6e2 25%)}.movement-active{position:absolute;top:0;height:42px;border-radius:7px;background:#DDF1E5;border:1px solid #9AC9AA}.movement-active::after{content:"";position:absolute;top:50%;left:50%;width:10px;height:10px;border-radius:50%;background:#32834D;transform:translate(-50%,-50%);box-shadow:0 0 0 4px #32834d20}.movement-times{display:flex;justify-content:space-between;margin:0 2px;color:#78827e;font-size:11px}.movement-events{display:grid;gap:0;margin-top:18px}.movement-event{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #EEF1EF;font-size:13px}.movement-event time{min-width:54px;color:#6B7280;font-variant-numeric:tabular-nums}.movement-event strong{font-weight:600}.movement-caption{margin:14px 0 0;color:#8A5300;font-size:12px}.movement-card{display:flex;flex-direction:column}.movement-card .movement-chart-area{flex:1}
 @media(max-width:720px){.boat-status-inner{padding:40px 20px 48px}.boat-status-grid{grid-template-columns:1fr}.boat-status-head h2{font-size:28px}}
 </style>
+<link rel="stylesheet" href="assets/alarm.css">
 </head>
 <body>
 <div style="font-family: inherit; color: #1E2433; background: #FFFFFF; min-height: 100vh">
@@ -27,12 +28,15 @@ a{color:inherit}
     <div style="max-width: 1200px; margin: 0 auto; padding: 56px 24px; display: flex; flex-wrap: wrap; gap: 48px; align-items: center">
       <div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
 
+        <div class="status-pills">
           <div style="display: inline-flex; align-self: flex-start; align-items: center; gap: 10px; padding: 8px 16px 8px 12px; border-radius: 999px; background: #FFFFFF29; border: 1px solid #FFFFFF80">
             <span style="width: 10px; height: 10px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 4px #FFFFFF29"></span>
             <span id="latest-status" style="font-weight: 600; font-size: 15px">Loading latest sail…</span>
             <span id="latest-status-detail" style="font-size: 14px; color: #C4C4C4">Boat data is loading</span>
             <button id="locate-open" type="button" style="padding: 0; border: 0; background: transparent; color: #FFFFFF; font: 600 14px 'DM Sans',sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Locate</button>
           </div>
+          <a id="alarm-badge" class="alarm-pill" href="#motion" data-state="off"><span class="alarm-dot"></span><span id="alarm-label">Alarm (…)</span><small id="alarm-detail">Connecting…</small></a>
+        </div>
 
 
         <div style="display: flex; flex-direction: column; gap: 12px">
@@ -150,15 +154,16 @@ a{color:inherit}
           <p id="sensor-last-updated" style="margin:10px 0 0;color:#6B7280;font-size:12px" role="status">Waiting for the first sensor reading.</p>
           <div class="boat-status-legend"><span><i class="legend-dot"></i>Temperature · °C</span><span><i class="legend-dot humidity"></i>Humidity · %</span></div>
         </article>
-        <article class="boat-status-card movement-card">
+        <article class="boat-status-card movement-card" id="motion" style="scroll-margin-top:24px">
           <h3>Movement sensor</h3>
-          <p>Illustrative sample events · no movement sensor data has been uploaded</p>
+          <p id="motion-status" role="status">Connecting to the Pi…</p>
+          <span class="alarm-live" id="motion-live" data-online="false">Connecting</span>
           <div class="movement-chart-area">
-            <div class="movement-track" aria-label="Movement sensor activation timeline from 09:00 to 12:00"><span class="movement-active" style="left:12%;width:5%"></span><span class="movement-active" style="left:39%;width:4%"></span><span class="movement-active" style="left:67%;width:7%"></span><span class="movement-active" style="left:88%;width:3%"></span></div>
-            <div class="movement-times"><span>09:00</span><span>10:00</span><span>11:00</span><span>12:00</span></div>
-            <div class="movement-events"><div class="movement-event"><i></i><time>09:22</time><strong>Movement detected</strong></div><div class="movement-event"><i></i><time>10:10</time><strong>Movement detected</strong></div><div class="movement-event"><i></i><time>11:01</time><strong>Movement detected</strong></div><div class="movement-event"><i></i><time>11:38</time><strong>Movement detected</strong></div></div>
+            <svg id="motion-chart" viewBox="0 0 640 108" role="img" aria-label="Recorded motion during the last 24 hours; hover over activity for exact times"></svg>
+            <div class="boat-status-legend"><span><i class="legend-dot" style="background:#32834d"></i>Movement</span><span><i class="legend-dot" style="background:#c34f3f"></i>Buzzer alarm</span></div>
+            <div id="movement-events" class="movement-events" aria-label="Recent motion and alarm events"></div>
           </div>
-          <p class="movement-caption">Illustrative sample values shown as placeholders.</p>
+          <p id="motion-updated" class="movement-caption">Waiting for the Pi.</p>
         </article>
       </div>
     </div>
@@ -308,5 +313,6 @@ a{color:inherit}
   const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Latest sailing area').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
 </script>
+<script src="assets/alarm.js" defer></script>
 </body>
 </html>

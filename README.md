@@ -23,3 +23,17 @@ The `kisero.org`, `www.kisero.org`, and `test.kisero.org` hostnames are mapped t
 ## Local preview
 
 Open `index.html` directly in a browser. The page has no build-time dependencies; the typefaces load from Google Fonts when a visitor is online and fall back to system fonts otherwise.
+
+## Motion alarm
+
+The hero's Alarm badge links to the live movement chart at `/#motion`.
+`assets/alarm.js` loads the last 24 hours of actual events and subscribes to the
+read-only AWS WebSocket feed. Reconnects refresh the snapshot; an offline Pi is
+identified after 90 seconds without a heartbeat. Displayed on/off state is the
+Pi's last confirmed setting; requested changes are shown as pending until applied.
+
+`alarm.html` is unlinked and noindex. Its URL fragment must contain the private
+control capability generated on the Pi; no secret is embedded in this repository.
+The public page cannot arm/disarm. Keep the complete private link confidential.
+The Pi implementation, AWS template, wiring and deployment instructions are in
+`kisero/raspberry-pi-kisero`.
