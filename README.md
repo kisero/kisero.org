@@ -79,9 +79,9 @@ the attribution and flags; smaller screens wrap naturally. The motion card lists
 only the three latest events; its timeline still uses the full recent history.
 The two status cards use the same desktop grid height so their bottom edges align.
 
-The hero removes live wind and sea-temperature tiles. A compact upper-left
-temperature/humidity badge links to the cabin chart, with the sensor freshness
-report below linking to the internet timeline. Its right-side boat button shows only
+The hero removes live wind and sea-temperature tiles. A compact right-aligned temperature/humidity badge sits immediately before the
+moored and alarm badges and links to the cabin chart. The sensor freshness
+report sits below all three badges and links to the internet timeline. Its right-side boat button shows only
 `Moored (location)` or `Sailing (location)` and opens the location map. The current
 state is explicitly configured in `assets/boat-status.json` as moored at Puerto
 Banús; it is not inferred from an old sailing session. Automatic live state
@@ -93,7 +93,8 @@ with an authenticated GPS feed.
 
 ## Internet timeline and compact telemetry
 
-The freshness-report link scrolls to a full-width, 24-hour internet timeline.
+The freshness-report link scrolls to a 24-hour internet timeline matching the
+combined width and outer edges of the two sensor cards above.
 `assets/connectivity.js` uses the authenticated Pi heartbeat receipt history
 included in `/v1/alarm` and its live WebSocket updates. Green means a successful
 Pi→AWS contact within the 90-second grace period; red means no contact; gray
