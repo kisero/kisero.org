@@ -11,7 +11,7 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 function merge(packet){
  if(packet.type==='pong')return;
  lastPacket=Date.now();
- if(packet.events)events=packet.events;
+ if(packet.events)events=Array.from(new Map([...events,...packet.events].map(e=>[e.id,e])).values());
  if(packet.event&&!events.some(e=>e.id===packet.event.id))events.push(packet.event);
  events=events.filter(e=>Date.parse(e.observedAt)>Date.now()-86400000).sort((a,b)=>a.observedAt.localeCompare(b.observedAt)).slice(-500);
  model={...model,...packet};render();
@@ -43,6 +43,7 @@ function render(){
   $('alarm-current').textContent=`Alarm (${state}) · ${detail}`;
   $('alarm-contact').textContent=d?`Last Pi contact: ${format(d.reportedAt)}`:'Waiting for first Pi contact.';
   $('alarm-requested').textContent=pending?`Requested: ${c.armed?'On':'Off'} — waiting for Pi confirmation.`:'';
+  if(!pending&&$('alarm-message').textContent==='Change saved. Waiting for the Pi to confirm.')$('alarm-message').textContent='Confirmed by the Pi.';
   document.querySelectorAll('#alarm-controls button').forEach(b=>b.disabled=!/^[a-f0-9]{64}$/.test(capability));
  }
 }
