@@ -20,6 +20,9 @@ a{color:inherit}
 #trip-rows .trip-row{cursor:pointer;transition:background-color .15s}#trip-rows .trip-row:hover,#trip-rows .trip-row:focus-within{background:#f0f6f3}#trip-rows .trip-row a:focus-visible{outline:2px solid #28745e;outline-offset:4px;border-radius:3px}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
+<link rel="stylesheet" href="assets/site-ui.css">
+<script src="assets/translations.js"></script>
+<script src="assets/i18n.js"></script>
 </head>
 <body>
 <div style="font-family: inherit; color: #1E2433; background: #FFFFFF; min-height: 100vh">
@@ -150,7 +153,7 @@ a{color:inherit}
         <article class="boat-status-card">
           <h3>Temperature and humidity</h3>
           <p id="sensor-chart-summary">Live sensor readings · collected every five minutes</p>
-          <svg id="sensor-chart" class="boat-chart" viewBox="0 0 640 260" role="img" aria-label="Waiting for cabin temperature and humidity readings"></svg>
+          <div class="sensor-chart-frame"><svg id="sensor-chart" class="boat-chart" viewBox="0 0 640 260" role="img" tabindex="0" aria-describedby="sensor-chart-help" aria-label="Waiting for cabin temperature and humidity readings"></svg><div class="sensor-tooltip" id="sensor-tooltip" role="status" hidden></div></div><p id="sensor-chart-help" class="chart-help">Hover or tap to see readings. Use arrow keys when the chart is focused.</p>
           <p id="sensor-last-updated" style="margin:10px 0 0;color:#6B7280;font-size:12px" role="status">Waiting for the first sensor reading.</p>
           <div class="boat-status-legend"><span><i class="legend-dot"></i>Temperature · °C</span><span><i class="legend-dot humidity"></i>Humidity · %</span></div>
         </article>
@@ -175,7 +178,7 @@ a{color:inherit}
       <span>kisero.org · First 27 SE · CRO 2882</span>
       <span>NMEA 2000 data obtained using <a href="https://www.yachtd.com/" target="_blank" rel="noopener noreferrer">YachtDevice</a></span>
     </div>
-  </footer>
+  <div class="site-footer-tools"><div class="project-links"><span>Project hosted at GitHub</span><a href="https://github.com/kisero/kisero.org" target="_blank" rel="noopener noreferrer">Website</a><a href="https://github.com/kisero/raspberry-pi-kisero" target="_blank" rel="noopener noreferrer">Raspberry Pi system</a></div><label class="language-picker"><span>Language</span><select data-language-picker aria-label="Language"><option value="en" lang="en">English</option><option value="es" lang="es">Español</option><option value="hr" lang="hr">Hrvatski</option><option value="sk" lang="sk">Slovenčina</option></select></label></div></footer>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="assets/sailing-stats.js"></script>
@@ -186,9 +189,11 @@ a{color:inherit}
   const sensorStatus=document.getElementById('sensor-last-updated');
   let hasSensorData=false;
   const svgNode=(name,attributes={},text='')=>{const node=document.createElementNS('http://www.w3.org/2000/svg',name);for(const [key,value] of Object.entries(attributes))node.setAttribute(key,String(value));if(text)node.textContent=text;return node;};
-  const sensorTime=value=>new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
+  const sensorTime=value=>new Date(value).toLocaleString(window.KiseroI18n.locale,{dateStyle:'medium',timeStyle:'short'});
   function drawSensorChart(samples){
     sensorSvg.replaceChildren();
+    document.getElementById('sensor-tooltip').hidden=true;
+    sensorSvg.onpointermove=sensorSvg.onpointerdown=sensorSvg.onpointerleave=sensorSvg.onfocus=sensorSvg.onblur=sensorSvg.onkeydown=null;
     sensorSvg.setAttribute('aria-label',`Cabin temperature and humidity from the latest ${samples.length?'24 hours':'sensor readings'}`);
     const now=Date.now(),recent=samples.filter(sample=>{const time=Date.parse(sample.observedAt);return Number.isFinite(time)&&time>=now-24*60*60*1000&&time<=now+60*1000;}).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
     if(!recent.length){sensorSvg.append(svgNode('text',{x:320,y:125,'text-anchor':'middle',class:'chart-empty'},'No sensor readings received yet'));return;}
@@ -218,9 +223,26 @@ a{color:inherit}
       humidityDot.append(svgNode('title',{},`${time} · ${humidity.toFixed(1)}% humidity`));
       sensorSvg.append(tempDot,humidityDot);
     }
-    const shortTime=value=>new Date(value).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+    const shortTime=value=>new Date(value).toLocaleTimeString(window.KiseroI18n.locale,{hour:'2-digit',minute:'2-digit'});
     sensorSvg.append(svgNode('text',{x:left,y:220},shortTime(recent[0].observedAt)),svgNode('text',{x:right,y:220,'text-anchor':'end'},shortTime(recent[recent.length-1].observedAt)));
     document.getElementById('sensor-chart-summary').textContent=`Recorded cabin readings · last 24 hours · ${recent.length} samples`;
+    let selected=recent.length-1;
+    const tooltip=document.getElementById('sensor-tooltip'),frame=sensorSvg.parentElement;
+    const hide=()=>{tooltip.hidden=true;sensorSvg.querySelector('.sensor-hover')?.remove();};
+    const show=index=>{
+      selected=Math.max(0,Math.min(recent.length-1,index));const sample=recent[selected],x=xFor(sample);
+      sensorSvg.querySelector('.sensor-hover')?.remove();
+      const hover=svgNode('g',{class:'sensor-hover','pointer-events':'none'});
+      hover.append(svgNode('line',{x1:x,x2:x,y1:top,y2:bottom,stroke:'#78827e','stroke-dasharray':'4 4'}),svgNode('circle',{cx:x,cy:yFor(Number(sample.temperatureC),tMin,tMax),r:5,class:'temp-dot'}),svgNode('circle',{cx:x,cy:yFor(Number(sample.humidityPct),hMin,hMax),r:5,class:'humidity-dot'}));sensorSvg.append(hover);
+      tooltip.replaceChildren();
+      for(const label of [sensorTime(sample.observedAt),`Temperature: ${Number(sample.temperatureC).toFixed(2)} °C`,`Humidity: ${Number(sample.humidityPct).toFixed(1)} %`]){const line=document.createElement('div');line.textContent=label;tooltip.append(line);}
+      tooltip.hidden=false;tooltip.style.left=`${Math.max(8,Math.min(x/640*frame.clientWidth+12,frame.clientWidth-tooltip.offsetWidth-8))}px`;tooltip.style.top='8px';
+    };
+    const point=event=>{const rect=sensorSvg.getBoundingClientRect(),ratio=Math.max(0,Math.min(1,((event.clientX-rect.left)/rect.width*640-left)/width)),time=first+ratio*span;show(recent.reduce((best,row,i)=>Math.abs(Date.parse(row.observedAt)-time)<Math.abs(Date.parse(recent[best].observedAt)-time)?i:best,0));};
+    sensorSvg.onpointermove=point;sensorSvg.onpointerdown=point;sensorSvg.onpointerleave=hide;
+    sensorSvg.onfocus=()=>show(selected);sensorSvg.onblur=hide;
+    sensorSvg.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End','Escape'].includes(event.key)){event.preventDefault();if(event.key==='Escape')hide();else show(event.key==='Home'?0:event.key==='End'?recent.length-1:selected+(event.key==='ArrowLeft'?-1:1));}};
+
   }
   async function refreshSensorReadings(){
     try{
@@ -251,7 +273,7 @@ a{color:inherit}
   const status=document.getElementById('latest-status');
   const detail=document.getElementById('latest-status-detail');
   let boatPosition=null, map=null, boatMarker=null;
-  const fmtDate=value=>{const [day,time=""]=value.split('T');return new Date(`${day}T00:00:00Z`).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})+(time?` · ${time.slice(0,5)}`:'')};
+  const fmtDate=value=>{const [day,time=""]=value.split('T');return new Date(`${day}T00:00:00Z`).toLocaleDateString(window.KiseroI18n.locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})+(time?` · ${time.slice(0,5)}`:'')};
   const duration=(start,end)=>{const a=new Date(`${start}Z`),b=new Date(`${end}Z`),mins=Math.max(0,Math.round((b-a)/60000));return `${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`};
   const cell=(text,styles='')=>{const td=document.createElement('td');td.textContent=text;td.style.cssText=`padding:14px 16px;border-bottom:1px solid #E4E8EE;${styles}`;return td};
   const coord=(lat,lon)=>`${Math.abs(lat).toFixed(6)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(6)}° ${lon>=0?'E':'W'}`;

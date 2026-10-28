@@ -50,3 +50,25 @@ Invalid/missing samples, duplicate timestamps and longer gaps break a sequence;
 fewer than three valid consecutive readings yields an em dash. Average and
 instantaneous maximum retain their existing definitions. The calculation applies
 to existing and future trips without rewriting archived logs or changing the API.
+
+## Languages, footer and sensor chart
+
+Every HTML page includes the footer's GitHub links to the website and Raspberry
+Pi repositories, plus an English / Español / Hrvatski / Slovenčina selector.
+The choice persists in browser storage; `?lang=en|es|hr|sk` also sets the language
+and works when storage is unavailable. Changing language preserves trip IDs and
+private URL fragments. No translation service or new backend is used.
+
+`assets/translations.js` contains the English source strings and all three
+translations, including parameterised live messages. `assets/i18n.js` applies
+these to text, chart SVGs, tooltips, page titles and accessibility labels,
+including later live updates, without replacing interactive elements. Dates use
+the selected locale; measurements use local decimal separators. Place names,
+boat identifiers, GPS coordinates and standard nautical abbreviations retain
+their original form. Add new user-facing copy to the catalog when editing pages.
+
+The cabin chart supports pointer hover, touch and keyboard focus. Each position
+selects the closest actual sample by timestamp and shows its date/time,
+temperature and humidity, with a vertical guide and markers on both series.
+Left/right arrows move between samples; Home/End select the first/last, Escape
+hides the tooltip. It uses original samples, not interpolated measurements.

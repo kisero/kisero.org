@@ -24,6 +24,9 @@
     @media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bottom-grid{grid-template-columns:1fr}.title-row{align-items:flex-start;flex-direction:column}.tag{align-self:flex-start}.chart{height:190px}}
     @media(max-width:480px){.top-inner,.main,.footer-inner{width:min(100% - 28px,1100px)}.top-inner{padding-top:18px}.nav{margin-bottom:28px}.panel{padding:16px}.stat{padding:14px}.readings{grid-template-columns:1fr}.download{align-items:flex-start;flex-direction:column}.map-frame{height:370px}.chart-card{padding:14px 12px}.chart{height:175px}}
   </style>
+<link rel="stylesheet" href="assets/site-ui.css">
+<script src="assets/translations.js"></script>
+<script src="assets/i18n.js"></script>
 </head>
 <body>
   <header class="top"><div class="top-inner">
@@ -89,7 +92,7 @@
       </section>
     </div>
   </main>
-<footer class="footer"><div class="footer-inner"><span>KISERO · Beneteau First 27 SE</span><span>Times shown as recorded; the source file has no timezone.</span></div></footer>
+<footer class="footer"><div class="footer-inner"><span>KISERO · Beneteau First 27 SE</span><span>Times shown as recorded; the source file has no timezone.</span></div><div class="site-footer-tools"><div class="project-links"><span>Project hosted at GitHub</span><a href="https://github.com/kisero/kisero.org" target="_blank" rel="noopener noreferrer">Website</a><a href="https://github.com/kisero/raspberry-pi-kisero" target="_blank" rel="noopener noreferrer">Raspberry Pi system</a></div><label class="language-picker"><span>Language</span><select data-language-picker aria-label="Language"><option value="en" lang="en">English</option><option value="es" lang="es">Español</option><option value="hr" lang="hr">Hrvatski</option><option value="sk" lang="sk">Slovenčina</option></select></label></div></footer>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="assets/sailing-stats.js"></script>
   <script>
@@ -97,7 +100,7 @@
   const API="https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
   const colors={SOG:'#19664f',TWS:'#347b96',AWS:'#c37a31',AWA:'#c37a31',TWA:'#7660a8',Rudder:'#238b84'};
   const params=new URLSearchParams(location.search);
-  const dateLabel=value=>{const [date,time='']=value.split('T');const [y,m,d]=date.split('-');return new Date(Date.UTC(+y,+m-1,+d)).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})};
+  const dateLabel=value=>{const [date,time='']=value.split('T');const [y,m,d]=date.split('-');return new Date(Date.UTC(+y,+m-1,+d)).toLocaleDateString(window.KiseroI18n.locale,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})};
   const shortTime=value=>value?.split('T')[1]?.slice(0,5)||'—';
   const minutes=(start,end)=>Math.max(0,Math.round((Date.parse(`${end}Z`)-Date.parse(`${start}Z`))/60000));
   const duration=mins=>`${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`;
@@ -164,8 +167,8 @@
       const ticks=angular?(hasWindAngles?[-180,-90,0,90,180]:[-30,0,30]):(max>9?[0,5,10,15,20,25].filter(value=>value<=max):[0,3,6,9]);
       const yFor=value=>t+ph-(Math.max(min,Math.min(max,value))-min)/(max-min)*ph;
       ticks.forEach(value=>{const y=yFor(value);add('line',{x1:l,y1:y,x2:w-r,y2:y,class:'axis'});add('text',{x:l-9,y:y+4,'text-anchor':'end',class:'chart-label'},String(value))});
-      add('text',{x:l,y:h-7,class:'chart-label'},new Date(first).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
-      add('text',{x:w-r,y:h-7,'text-anchor':'end',class:'chart-label'},new Date(last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+      add('text',{x:l,y:h-7,class:'chart-label'},new Date(first).toLocaleTimeString(window.KiseroI18n.locale,{hour:'2-digit',minute:'2-digit'}));
+      add('text',{x:w-r,y:h-7,'text-anchor':'end',class:'chart-label'},new Date(last).toLocaleTimeString(window.KiseroI18n.locale,{hour:'2-digit',minute:'2-digit'}));
       available.forEach(key=>{
         let pathData='',open=false,previous=null;
         plotted[key].forEach(point=>{
@@ -184,7 +187,7 @@
         const hover=add('g',{class:'chart-hover','pointer-events':'none'});
         const line=document.createElementNS(NS,'line');line.setAttribute('x1',x);line.setAttribute('x2',x);line.setAttribute('y1',t);line.setAttribute('y2',t+ph);line.setAttribute('stroke','#73827b');line.setAttribute('stroke-dasharray','4 4');line.setAttribute('stroke-width','1');hover.append(line);
         const tooltip=card.querySelector('.chart-tooltip');tooltip.replaceChildren();
-        const heading=document.createElement('span');heading.className='tooltip-heading';heading.textContent=new Date(plotted[available[0]][index].t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tooltip.append(heading);
+        const heading=document.createElement('span');heading.className='tooltip-heading';heading.textContent=new Date(plotted[available[0]][index].t).toLocaleTimeString(window.KiseroI18n.locale,{hour:'2-digit',minute:'2-digit'});tooltip.append(heading);
         available.forEach(key=>{const point=plotted[key][index];if(point?.v===null)return;const circle=document.createElementNS(NS,'circle');circle.setAttribute('cx',x);circle.setAttribute('cy',yFor(point.v));circle.setAttribute('r','4');circle.setAttribute('fill',colors[key]);circle.setAttribute('stroke','#fff');circle.setAttribute('stroke-width','2');hover.append(circle);const row=document.createElement('span');row.textContent=`${key==='Rudder'?'Rudder angle':key}: ${point.v.toFixed(1)}${angular?'°':' kn'}`;tooltip.append(row)});
         tooltip.style.display='block';const frame=svg.parentElement.getBoundingClientRect();
         tooltip.style.left=`${Math.max(8,Math.min(event.clientX-frame.left+14,frame.width-tooltip.offsetWidth-8))}px`;

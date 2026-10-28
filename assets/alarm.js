@@ -6,7 +6,7 @@ const $=id=>document.getElementById(id);
 const admin=!!$('alarm-controls');
 const capability=admin?location.hash.slice(1):'';
 let model=null,events=[],socket=null,reconnect=null,lastPacket=0,closed=false;
-const format=t=>new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const format=t=>new Date(t).toLocaleString(window.KiseroI18n.locale, {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function merge(packet){
  if(packet.type==='pong')return;
@@ -42,7 +42,7 @@ function render(){
   $('alarm-current').textContent=`Alarm (${state}) · ${detail}`;
   $('alarm-contact').textContent=d?`Last Pi contact: ${format(d.reportedAt)}`:'Waiting for first Pi contact.';
   $('alarm-requested').textContent=pending?`Requested: ${c.armed?'On':'Off'} — waiting for Pi confirmation.`:'';
-  if(!pending&&$('alarm-message').textContent==='Change saved. Waiting for the Pi to confirm.')$('alarm-message').textContent='Confirmed by the Pi.';
+  if(!pending&&[$('alarm-message').textContent].some(value=>value==='Change saved. Waiting for the Pi to confirm.'||value===window.KiseroI18n.t('Change saved. Waiting for the Pi to confirm.')))$('alarm-message').textContent='Confirmed by the Pi.';
   document.querySelectorAll('#alarm-controls button').forEach(b=>b.disabled=!/^[a-f0-9]{64}$/.test(capability));
  }
 }
@@ -53,7 +53,7 @@ function draw(){
  for(const e of events){const t=Date.parse(e.observedAt);if((e.kind==='motion'||e.kind==='ready')&&e.motion){if(active===null)active=t;}else if((e.kind==='motion'||e.kind==='ready')&&!e.motion&&active!==null){segments.push([active,t]);active=null;}}
  if(active!==null){const contact=Date.parse(model.device?.reportedAt);segments.push([active,Math.min(end,Number.isFinite(contact)?contact:end)]);}
  let html='<rect x="40" y="24" width="560" height="42" rx="7" fill="#edf1ef"/>';
- for(let i=0;i<=4;i++){const t=start+i*21600000;html+=`<text x="${40+i*140}" y="91" text-anchor="${i===0?'start':i===4?'end':'middle'}">${esc(new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}))}</text>`;}
+ for(let i=0;i<=4;i++){const t=start+i*21600000;html+=`<text x="${40+i*140}" y="91" text-anchor="${i===0?'start':i===4?'end':'middle'}">${esc(new Date(t).toLocaleTimeString(window.KiseroI18n.locale,{hour:'2-digit',minute:'2-digit'}))}</text>`;}
  for(const [a,b]of segments){if(b>=a)html+=`<rect class="activity" x="${x(a)}" y="24" width="${Math.max(3,x(b)-x(a))}" height="42" rx="3"><title>Movement: ${esc(format(a))} – ${esc(format(b))}</title></rect>`;}
  for(const e of events.filter(e=>e.kind==='triggered'))html+=`<rect class="alert" x="${x(Date.parse(e.observedAt))}" y="18" width="4" height="54"><title>Buzzer triggered: ${esc(format(e.observedAt))}</title></rect>`;
  svg.innerHTML=html;
@@ -78,5 +78,6 @@ if(admin){
 snapshot();
 setInterval(()=>{render();if(socket?.readyState===1)socket.send('{"action":"ping"}');if(socket?.readyState!==1||Date.now()-lastPacket>75000)snapshot();},15000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)snapshot();});
+window.addEventListener('pageshow',event=>{if(event.persisted){closed=false;socket=null;snapshot();}});
 window.addEventListener('pagehide',()=>{closed=true;socket?.close();clearTimeout(reconnect);});
 })();
