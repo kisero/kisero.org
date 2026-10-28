@@ -17,6 +17,7 @@ a{color:inherit}
 .locate-dialog{width:min(900px,calc(100vw - 32px));padding:0;border:0;border-radius:16px;overflow:hidden;color:#1E2433;box-shadow:0 20px 70px #0005;font:15px/1.5 "DM Sans",sans-serif}.locate-dialog::backdrop{background:#07100dcc}.locate-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px}.locate-head h2{margin:0;font:700 21px Manrope,sans-serif}.locate-head p{margin:5px 0 0;color:#6B7280;font-size:13px}.locate-close{width:36px;height:36px;border:0;border-radius:50%;background:#F1F3F7;color:#1E2433;font:24px/1 "DM Sans",sans-serif;cursor:pointer}.locate-map{height:min(62vh,520px);min-height:320px;background:#e5ece8}.locate-readout{display:flex;flex-wrap:wrap;gap:10px 24px;padding:14px 22px;border-top:1px solid #E4E8EE;font-size:14px}.locate-readout strong{font-variant-numeric:tabular-nums}.locate-sample{color:#8A5300;font-size:12px}
 .boat-status{background:#fff}.boat-status-inner{max-width:1200px;margin:0 auto;padding:52px 24px 64px}.boat-status-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:22px}.boat-status-head h2{margin:0;font:600 32px Manrope,sans-serif;letter-spacing:-.02em}.boat-status-head p{margin:6px 0 0;color:#6B7280;font-size:15px}.boat-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.boat-status-card{min-width:0;padding:20px;background:#fff;border:1px solid #E4E8EE;border-radius:14px;box-shadow:0 1px 3px #1e24330c}.boat-status-card h3{margin:0;font:700 18px Manrope,sans-serif}.boat-status-card>p{margin:4px 0 14px;color:#6B7280;font-size:13px}.boat-chart{display:block;width:100%;height:auto}.boat-chart text{fill:#78827e;font:12px "DM Sans",sans-serif}.boat-chart .chart-empty{fill:#6B7280;font:15px "DM Sans",sans-serif}.boat-chart .grid{stroke:#E5EBE8;stroke-width:1}.boat-chart .temp-line{fill:none;stroke:#28745E;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.boat-chart .humidity-line{fill:none;stroke:#3984A0;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.boat-chart .temp-dot{fill:#28745E;stroke:#fff;stroke-width:2}.boat-chart .humidity-dot{fill:#3984A0;stroke:#fff;stroke-width:2}.boat-status-legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:10px;color:#53615b;font-size:12px}.boat-status-legend span{display:inline-flex;align-items:center;gap:7px}.legend-dot{width:9px;height:9px;border-radius:50%;background:#28745E}.legend-dot.humidity{background:#3984A0}.movement-track{position:relative;margin:16px 4px 8px;height:42px;border-radius:8px;background:repeating-linear-gradient(90deg,#edf1ef 0,#edf1ef calc(25% - 1px),#dfe6e2 calc(25% - 1px),#dfe6e2 25%)}.movement-active{position:absolute;top:0;height:42px;border-radius:7px;background:#DDF1E5;border:1px solid #9AC9AA}.movement-active::after{content:"";position:absolute;top:50%;left:50%;width:10px;height:10px;border-radius:50%;background:#32834D;transform:translate(-50%,-50%);box-shadow:0 0 0 4px #32834d20}.movement-times{display:flex;justify-content:space-between;margin:0 2px;color:#78827e;font-size:11px}.movement-events{display:grid;gap:0;margin-top:18px}.movement-event{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #EEF1EF;font-size:13px}.movement-event time{min-width:54px;color:#6B7280;font-variant-numeric:tabular-nums}.movement-event strong{font-weight:600}.movement-caption{margin:14px 0 0;color:#8A5300;font-size:12px}.movement-card{display:flex;flex-direction:column}.movement-card .movement-chart-area{flex:1}
 @media(max-width:720px){.boat-status-inner{padding:40px 20px 48px}.boat-status-grid{grid-template-columns:1fr}.boat-status-head h2{font-size:28px}}
+#trip-rows .trip-row{cursor:pointer;transition:background-color .15s}#trip-rows .trip-row:hover,#trip-rows .trip-row:focus-within{background:#f0f6f3}#trip-rows .trip-row a:focus-visible{outline:2px solid #28745e;outline-offset:4px;border-radius:3px}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
 </head>
@@ -133,10 +134,9 @@ a{color:inherit}
               <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right" title="Sustained = highest mean of 3 consecutive 15-second SOG readings">Avg / Sustained / Max SOG</th>
               <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Avg / max TWS</th>
               <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE">Wind</th>
-              <th scope="col" style="padding: 12px 16px; border-bottom: 1px solid #E4E8EE"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Details</span></th>
             </tr>
           </thead>
-          <tbody id="trip-rows"><tr><td colspan="8" style="padding:16px;color:#6B7280">Loading recorded trips…</td></tr></tbody>
+          <tbody id="trip-rows"><tr><td colspan="7" style="padding:16px;color:#6B7280">Loading recorded trips…</td></tr></tbody>
         </table>
       </div>
       <p style="margin: -14px 0 0; font-size: 13px; color: #6B7280">Port names are matched to GPS positions; coordinates remain available below each route. Place data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p>
@@ -268,7 +268,7 @@ a{color:inherit}
   };
   fetch(`${API}/v1/trips`).then(response=>{if(!response.ok)throw new Error('Trip data is temporarily unavailable.');return response.json()}).then(async payload=>{
     const trips=payload.trips||[];
-    if(!trips.length){status.textContent='No recorded sail yet';detail.textContent='The boat log will appear here after its first upload';rows.innerHTML='<tr><td colspan="8" style="padding:16px;color:#6B7280">No sailing sessions recorded yet.</td></tr>';return;}
+    if(!trips.length){status.textContent='No recorded sail yet';detail.textContent='The boat log will appear here after its first upload';rows.innerHTML='<tr><td colspan="7" style="padding:16px;color:#6B7280">No sailing sessions recorded yet.</td></tr>';return;}
     const latest=trips[0];
     status.textContent=`Latest recorded sail · ${fmtDate(latest.start)}`;
     detail.textContent=`${latest.averageSogKn} kn average · ${latest.maxSogKn} kn top speed`;
@@ -287,10 +287,17 @@ a{color:inherit}
     for(const trip of trips){
       const track=detailsById.get(trip.id)?.track||[];
       const first=track[0],last=track[track.length-1];
+      const tripUrl=`logbook.html?id=${encodeURIComponent(trip.id)}`;
       const tr=document.createElement('tr');
+      tr.className='trip-row';
+      tr.addEventListener('click',event=>{
+        if(event.target.closest('a,button,input,select,textarea')||window.getSelection()?.toString())return;
+        if(event.ctrlKey||event.metaKey)window.open(tripUrl,'_blank','noopener');
+        else location.href=tripUrl;
+      });
       tr.append(cell(fmtDate(trip.start),'white-space:nowrap;color:#4B5563'));
       const route=cell('','font-weight:500;min-width:250px');
-      const routeLink=document.createElement('a');routeLink.href='logbook.html';routeLink.setAttribute('aria-label','Open exact GPS track');routeLink.style.cssText='display:grid;gap:4px;color:#1E2433;text-decoration:none;font-size:12px;line-height:1.35;font-variant-numeric:tabular-nums';
+      const routeLink=document.createElement('a');routeLink.href=tripUrl;routeLink.setAttribute('aria-label','Open exact GPS track');routeLink.style.cssText='display:grid;gap:4px;color:#1E2433;text-decoration:none;font-size:12px;line-height:1.35;font-variant-numeric:tabular-nums';
       if(first&&last){
         const startLat=Number(first[1]),startLon=Number(first[0]),endLat=Number(last[1]),endLon=Number(last[0]);
         const startPlace=placeAt(startLat,startLon,knownPlaces.places||[]),endPlace=placeAt(endLat,endLon,knownPlaces.places||[]);
@@ -310,10 +317,10 @@ a{color:inherit}
       const wind=cell('','');
       if(stats.bearing!==null){const badge=document.createElement('span');const degrees=Math.round(stats.bearing);badge.textContent=`${windName(stats.bearing)} · ${degrees}°`;badge.title=`Circular mean of ${Object.values(sensorData.readings||{}).filter(row=>Number.isFinite(Number(row.TWD))).length} recorded true-wind direction readings`;badge.style.cssText='display:inline-block;padding:3px 10px;border-radius:999px;background:#E8F2EE;color:#205F4D;font-size:13px;white-space:nowrap';wind.append(badge);}else{wind.textContent='—';wind.style.color='#6B7280';}
       tr.append(wind);
-      const action=cell('','text-align:right');const link=document.createElement('a');link.href='logbook.html';link.textContent='Details →';link.style.cssText='display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border-radius:8px;color:#111;text-decoration:none;font-weight:500;white-space:nowrap';action.append(link);tr.append(action);rows.append(tr);
+      rows.append(tr);
     }
     const latestTrack=detailsById.get(latest.id)?.track,point=latestTrack?.[0];if(point){const lat=Number(point[1]),lon=Number(point[0]);boatPosition=[lat,lon];document.getElementById('boat-coordinates').textContent=`${Math.abs(lat).toFixed(4)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(4)}° ${lon>=0?'E':'W'}`;document.querySelector('.locate-sample').textContent='First GPS position in the latest recorded track';document.getElementById('boat-speed').textContent=`${latest.averageSogKn} kn avg`;if(map&&boatMarker){boatMarker.setLatLng(boatPosition);map.setView(boatPosition,13);}}
-  }).catch(error=>{status.textContent='Boat data temporarily unavailable';detail.textContent=error.message;rows.innerHTML='<tr><td colspan="8" style="padding:16px;color:#8A5300">Trip summaries could not be loaded. Try the sailing log again shortly.</td></tr>';});
+  }).catch(error=>{status.textContent='Boat data temporarily unavailable';detail.textContent=error.message;rows.innerHTML='<tr><td colspan="7" style="padding:16px;color:#8A5300">Trip summaries could not be loaded. Try the sailing log again shortly.</td></tr>';});
   const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Latest sailing area').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
 </script>
