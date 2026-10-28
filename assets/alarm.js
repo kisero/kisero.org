@@ -23,7 +23,7 @@ function render(){
  const pending=!d||d.controlVersion!==c.version;
  const delay=d?.armingUntil&&Date.parse(d.armingUntil)>Date.now();
  const state=d?(d.armed?'On':'Off'):'Unknown';
- let detail=!fresh?'Pi offline':pending?'Applying change…':!d.ready?'Sensor warming up':delay?'Exit delay':d.sounding?'Motion alarm sounding':d.motion?'Movement detected':'No movement';
+ let detail=!fresh?'Pi offline':pending?'Applying change…':!d.armed?'Alarm (Off)':!d.ready?'Sensor warming up':delay?'Exit delay':d.sounding?'Motion alarm sounding':d.motion?'Movement detected':'No movement';
  if(!fresh&&c.armed!==d?.armed)detail='Pi offline · change pending';
  if($('alarm-label'))$('alarm-label').textContent=`Alarm (${state})`;
  if($('alarm-badge'))$('alarm-badge').dataset.state=d?.sounding?'triggered':d?.armed?'on':'off';
@@ -35,7 +35,7 @@ function render(){
  draw();
  if($('movement-events')){
   const labels={motion:'Movement detected',armed:'Alarm turned on · exit delay',disarmed:'Alarm turned off',triggered:'Buzzer alarm triggered',silenced:'Buzzer stopped',ready:'Motion sensor ready'};
-  $('movement-events').innerHTML=events.slice().reverse().slice(0,3).map(e=>`<div class="movement-event" data-kind="${esc(e.kind)}"><time datetime="${esc(e.observedAt)}">${esc(format(e.observedAt))}</time><strong>${esc(e.kind==='motion'&&!e.motion?'Movement cleared':labels[e.kind]||e.kind)}</strong></div>`).join('')||'<p class="movement-empty">No recorded motion events in the last 24 hours.</p>';
+  $('movement-events').innerHTML=events.filter(e=>e.armed===true&&['motion','triggered','silenced'].includes(e.kind)).reverse().slice(0,3).map(e=>`<div class="movement-event" data-kind="${esc(e.kind)}"><time datetime="${esc(e.observedAt)}">${esc(format(e.observedAt))}</time><strong>${esc(e.kind==='motion'&&!e.motion?'Movement cleared':labels[e.kind]||e.kind)}</strong></div>`).join('')||'<p class="movement-empty">No alarm activity while armed in the last 24 hours.</p>';
  }
  if(admin){
   $('alarm-current').textContent=`Alarm (${state}) · ${detail}`;
@@ -49,12 +49,24 @@ function draw(){
  const svg=$('motion-chart');if(!svg)return;
  const end=Date.now(),start=end-86400000,x=t=>40+Math.max(0,Math.min(1,(t-start)/86400000))*560;
  let active=null,segments=[];
- for(const e of events){const t=Date.parse(e.observedAt);if((e.kind==='motion'||e.kind==='ready')&&e.motion){if(active===null)active=t;}else if((e.kind==='motion'||e.kind==='ready')&&!e.motion&&active!==null){segments.push([active,t]);active=null;}}
+ // Each device event records its confirmed armed state. Disarmed events close
+ // activity, even if the PIR is still high; they never start a colored segment.
+ for(const e of events){
+  const t=Date.parse(e.observedAt);
+  if(e.armed!==true||e.kind==='disarmed'){
+   if(active!==null){segments.push([active,t]);active=null;}
+   continue;
+  }
+  if(e.kind==='motion'||e.kind==='ready'||e.kind==='armed'||e.kind==='triggered'){
+   if(e.motion===true){if(active===null)active=t;}
+   else if(active!==null){segments.push([active,t]);active=null;}
+  }
+ }
  if(active!==null){const contact=Date.parse(model.device?.reportedAt);segments.push([active,Math.min(end,Number.isFinite(contact)?contact:end)]);}
  let html='<rect x="40" y="24" width="560" height="42" rx="7" fill="#edf1ef"/>';
  for(let i=0;i<=4;i++){const t=start+i*21600000;html+=`<text x="${40+i*140}" y="91" text-anchor="${i===0?'start':i===4?'end':'middle'}">${esc(new Date(t).toLocaleTimeString(window.KiseroI18n.locale,{hour:'2-digit',minute:'2-digit'}))}</text>`;}
  for(const [a,b]of segments){if(b>=a)html+=`<rect class="activity" x="${x(a)}" y="24" width="${Math.max(3,x(b)-x(a))}" height="42" rx="3"><title>Movement: ${esc(format(a))} – ${esc(format(b))}</title></rect>`;}
- for(const e of events.filter(e=>e.kind==='triggered'))html+=`<rect class="alert" x="${x(Date.parse(e.observedAt))}" y="18" width="4" height="54"><title>Buzzer triggered: ${esc(format(e.observedAt))}</title></rect>`;
+ for(const e of events.filter(e=>e.kind==='triggered'&&e.armed===true))html+=`<rect class="alert" x="${x(Date.parse(e.observedAt))}" y="18" width="4" height="54"><title>Buzzer triggered: ${esc(format(e.observedAt))}</title></rect>`;
  svg.innerHTML=html;
 }
 async function snapshot(){try{const r=await fetch(API+'/v1/alarm',{cache:'no-store'});if(!r.ok)throw Error();const p=await r.json();merge(p);connect(p.websocketUrl);}catch(e){if($('motion-live')){$('motion-live').textContent='Feed unavailable';$('motion-live').dataset.online='false';}if($('alarm-message'))$('alarm-message').textContent='Cannot reach the alarm service. Try again shortly.';}}

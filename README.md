@@ -29,7 +29,7 @@ Open `index.html` directly in a browser. The page has no build-time dependencies
 The hero's Alarm badge links to the live movement chart at `/#motion`.
 `assets/alarm.js` loads the last 24 hours of actual events and subscribes to the
 read-only AWS WebSocket feed. Reconnects refresh the snapshot; an offline Pi is
-identified after 90 seconds without a heartbeat. Displayed on/off state is the
+identified after 90 seconds without a heartbeat. The public motion timeline and recent activity list only show events recorded while armed; disarming closes any active movement segment and leaves subsequent time gray. Raw sensor events remain archived. Displayed on/off state is the
 Pi's last confirmed setting; requested changes are shown as pending until applied.
 
 `alarm.html` is unlinked and noindex. Its URL fragment must contain the private

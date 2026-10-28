@@ -1231,10 +1231,10 @@ window.KiseroMessages=[
   "Pohyb za posledných 24 hodín; presné časy zobrazíte kurzorom"
  ],
  [
-  "No recorded motion events in the last 24 hours.",
-  "No hay eventos de movimiento en las últimas 24 horas.",
-  "Nema zabilježenih pokreta u posljednja 24 sata.",
-  "Za posledných 24 hodín nebol zaznamenaný pohyb."
+  "No alarm activity while armed in the last 24 hours.",
+  "No hubo actividad de alarma mientras estaba activada en las últimas 24 horas.",
+  "Nema aktivnosti uključenog alarma u posljednja 24 sata.",
+  "Za posledných 24 hodín nebola zaznamenaná aktivita zapnutého alarmu."
  ],
  [
   "Movement: {0} – {1}",
