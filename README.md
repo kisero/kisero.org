@@ -37,3 +37,16 @@ control capability generated on the Pi; no secret is embedded in this repository
 The public page cannot arm/disarm. Keep the complete private link confidential.
 The Pi implementation, AWS template, wiring and deployment instructions are in
 `kisero/raspberry-pi-kisero`.
+
+## Sustained sailing speed
+
+The sailing table and logbook show **Avg / Sustained / Max SOG** in knots.
+`assets/sailing-stats.js` derives sustained SOG from the original API GPS track,
+before chart aggregation: take every overlapping sequence of three adjacent
+readings, require exactly 15 seconds between each pair, average their SOGs, and
+choose the highest unrounded mean. Round only for display to one decimal.
+Three readings at t, t+15 and t+30 span 30 seconds between first and last.
+Invalid/missing samples, duplicate timestamps and longer gaps break a sequence;
+fewer than three valid consecutive readings yields an em dash. Average and
+instantaneous maximum retain their existing definitions. The calculation applies
+to existing and future trips without rewriting archived logs or changing the API.

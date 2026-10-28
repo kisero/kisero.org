@@ -130,7 +130,7 @@ a{color:inherit}
               <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE">Route</th>
               <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Distance</th>
               <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Duration</th>
-              <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Avg / max SOG</th>
+              <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right" title="Sustained = highest mean of 3 consecutive 15-second SOG readings">Avg / Sustained / Max SOG</th>
               <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE; text-align: right">Avg / max TWS</th>
               <th scope="col" style="padding: 12px 16px; font-weight: 500; color: #4B5563; border-bottom: 1px solid #E4E8EE">Wind</th>
               <th scope="col" style="padding: 12px 16px; border-bottom: 1px solid #E4E8EE"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Details</span></th>
@@ -178,6 +178,7 @@ a{color:inherit}
   </footer>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="assets/sailing-stats.js"></script>
 <script>
 (()=>{
   const API="https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
@@ -300,7 +301,10 @@ a{color:inherit}
       route.replaceChildren(routeLink);tr.append(route);
       tr.append(cell(`${Number(trip.distanceNm).toFixed(2)} nm`,'text-align:right;font-variant-numeric:tabular-nums'));
       tr.append(cell(duration(trip.start,trip.end),'text-align:right;font-variant-numeric:tabular-nums'));
-      tr.append(cell(`${Number(trip.averageSogKn).toFixed(1)} / ${Number(trip.maxSogKn).toFixed(1)} kn`,'text-align:right;font-variant-numeric:tabular-nums'));
+      const sustained=KiseroSailingStats.sustainedSog(track);
+      const speed=cell(`${Number(trip.averageSogKn).toFixed(1)} / ${sustained?sustained.kn.toFixed(1):'—'} / ${Number(trip.maxSogKn).toFixed(1)} kn`,'text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap');
+      speed.title=sustained?`Sustained: highest average of 3 consecutive 15-second SOG readings · ${sustained.start.slice(11,19)}–${sustained.end.slice(11,19)} (log time)`:'Sustained speed unavailable: no complete sequence of 3 consecutive 15-second readings';
+      tr.append(speed);
       const stats=windStats(trip.id===sensorData.tripId?sensorData.readings:{});
       tr.append(cell(stats.speed,'text-align:right;font-variant-numeric:tabular-nums'));
       const wind=cell('','');

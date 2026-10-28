@@ -35,7 +35,7 @@
     <section class="stats" aria-label="Session summary">
       <article class="card stat"><span class="label">GPS distance estimate</span><span class="value" id="stat-distance">— <span class="unit">nm</span></span></article>
       <article class="card stat"><span class="label">Recorded duration</span><span class="value" id="stat-duration">—</span></article>
-      <article class="card stat"><span class="label">Avg / max SOG</span><span class="value" id="stat-sog">— / — <span class="unit">kn</span></span></article>
+      <article class="card stat"><span class="label">Avg / Sustained / Max SOG</span><span class="value" id="stat-sog">— / — / — <span class="unit">kn</span></span></article>
       <article class="card stat"><span class="label">Avg / max TWS</span><span class="value" id="stat-tws">— / — <span class="unit">kn</span></span><span class="label" id="stat-tws-note">Wind readings unavailable</span></article>
     </section>
 
@@ -91,6 +91,7 @@
   </main>
 <footer class="footer"><div class="footer-inner"><span>KISERO · Beneteau First 27 SE</span><span>Times shown as recorded; the source file has no timezone.</span></div></footer>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="assets/sailing-stats.js"></script>
   <script>
 (()=>{
   const API="https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
@@ -113,11 +114,16 @@
       document.getElementById('trip-range').textContent=`${shortTime(trip.start)}–${shortTime(trip.end)} · ${trip.pointCount} underway GPS points`;
       document.getElementById('stat-distance').innerHTML=`${Number(trip.distanceNm).toFixed(2)} <span class="unit">nm</span>`;
       document.getElementById('stat-duration').textContent=duration(minutes(trip.start,trip.end));
-      document.getElementById('stat-sog').innerHTML=`${Number(trip.averageSogKn).toFixed(1)} / ${Number(trip.maxSogKn).toFixed(1)} <span class="unit">kn</span>`;
+
       document.getElementById('download-detail').textContent=`Exact GPS track · JSON · ${trip.pointCount} points`;
       const detailUrl=`${API}/v1/trips/${encodeURIComponent(trip.id)}`;document.getElementById('download-track').href=detailUrl;
       const response=await fetch(detailUrl);if(!response.ok)throw new Error('The exact GPS track could not be loaded.');
-      const data=await response.json();let sensorReadings={};try{const windResponse=await fetch('/assets/sensor-readings.json');if(windResponse.ok){const windData=await windResponse.json();if(windData.tripId===trip.id)sensorReadings=windData.readings||{}}}catch{}
+      const data=await response.json();
+      const sustained=KiseroSailingStats.sustainedSog(data.track);
+      const speedStat=document.getElementById('stat-sog');
+      speedStat.innerHTML=`${Number(trip.averageSogKn).toFixed(1)} / ${sustained?sustained.kn.toFixed(1):'—'} / ${Number(trip.maxSogKn).toFixed(1)} <span class="unit">kn</span>`;
+      speedStat.title=sustained?`Sustained: highest average of 3 consecutive 15-second SOG readings · ${sustained.start.slice(11,19)}–${sustained.end.slice(11,19)} (log time)`:'Sustained speed unavailable: no complete sequence of 3 consecutive 15-second readings';
+      let sensorReadings={};try{const windResponse=await fetch('/assets/sensor-readings.json');if(windResponse.ok){const windData=await windResponse.json();if(windData.tripId===trip.id)sensorReadings=windData.readings||{}}}catch{}
       const points=(data.track||[]).map(row=>({lon:Number(row[0]),lat:Number(row[1]),time:row[2],SOG:Number(row[3]),...(sensorReadings[row[2]]||{})})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));
       if(!points.length)throw new Error('This session has no GPS points.');
       document.getElementById('quality-points').textContent=String(points.length);
