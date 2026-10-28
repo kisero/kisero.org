@@ -1517,5 +1517,59 @@ window.KiseroMessages=[
   "Última posición GPS registrada",
   "Posljednji zabilježeni GPS položaj",
   "Posledná zaznamenaná GPS poloha"
+ ],
+ [
+  "Internet connection",
+  "Conexión a internet",
+  "Internetska veza",
+  "Internetové pripojenie"
+ ],
+ [
+  "Waiting for Pi contact",
+  "Esperando contacto con la Pi",
+  "Čekanje kontakta s Pi uređajem",
+  "Čaká sa na kontakt s Pi"
+ ],
+ [
+  "Pi internet contact during the last 24 hours",
+  "Contacto de la Pi por internet durante las últimas 24 horas",
+  "Internetski kontakt s Pi uređajem u posljednja 24 sata",
+  "Kontakt Pi cez internet za posledných 24 hodín"
+ ],
+ [
+  "Contact confirmed",
+  "Contacto confirmado",
+  "Kontakt potvrđen",
+  "Kontakt potvrdený"
+ ],
+ [
+  "No contact",
+  "Sin contacto",
+  "Nema kontakta",
+  "Bez kontaktu"
+ ],
+ [
+  "No data",
+  "Sin datos",
+  "Nema podataka",
+  "Bez údajov"
+ ],
+ [
+  "Status unavailable",
+  "Estado no disponible",
+  "Stanje nije dostupno",
+  "Stav nie je dostupný"
+ ],
+ [
+  "Online",
+  "Conectada",
+  "Povezan",
+  "Pripojené"
+ ],
+ [
+  "Contact confirmed: {0} – {1}",
+  "Contacto confirmado: {0} – {1}",
+  "Kontakt potvrđen: {0} – {1}",
+  "Kontakt potvrdený: {0} – {1}"
  ]
 ];

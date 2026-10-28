@@ -20,9 +20,9 @@ a{color:inherit}
 #trip-rows .trip-row{cursor:pointer;transition:background-color .15s}#trip-rows .trip-row:hover,#trip-rows .trip-row:focus-within{background:#f0f6f3}#trip-rows .trip-row a:focus-visible{outline:2px solid #28745e;outline-offset:4px;border-radius:3px}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
-<link rel="stylesheet" href="assets/site-ui.css?v=20261028-layout">
-<script src="assets/translations.js?v=20261028-layout"></script>
-<script src="assets/i18n.js?v=20261028-layout"></script>
+<link rel="stylesheet" href="assets/site-ui.css?v=20261028-connectivity">
+<script src="assets/translations.js?v=20261028-connectivity"></script>
+<script src="assets/i18n.js?v=20261028-connectivity"></script>
 </head>
 <body>
 <div style="font-family: inherit; color: #1E2433; background: #FFFFFF; min-height: 100vh">
@@ -32,34 +32,19 @@ a{color:inherit}
     <div style="max-width: 1200px; margin: 0 auto; padding: 56px 24px; display: flex; flex-wrap: wrap; gap: 48px; align-items: center">
       <div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
 
+        <div class="hero-status-row">
+          <div class="hero-cabin-summary"><a class="cabin-pill" href="#cabin-chart" title="Temperature and humidity"><strong><span id="cabin-temperature">— °C</span> - <span id="cabin-humidity">— %</span></strong></a><a id="cabin-sensor-status" class="sensor-report-link" href="#internet">Cabin sensor readings refresh every five minutes.</a></div>
         <div class="status-pills">
           <button id="locate-open" class="boat-location-pill" type="button" title="Configured berth; live GPS is not connected."><span class="boat-status-dot" aria-hidden="true"></span><span id="latest-status">Moored (Puerto Banús)</span></button>
           <a id="alarm-badge" class="alarm-pill" href="#motion" data-state="off"><span class="alarm-dot"></span><span id="alarm-label">Alarm (…)</span></a>
         </div>
-
+        </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px">
           <h1 style="margin: 0; font-size: 72px; line-height: 1; font-weight: 800; letter-spacing: 0.02em; font-style: italic">KISERO</h1>
           <p style="margin: 0; font-size: 20px; color: #C4C4C4; font-weight: 300">Beneteau First 27 SE · sailing out of Puerto Banús, Spain</p>
         </div>
-        <div class="hero-sensor-tiles">
-          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
-            <span style="font-size: 13px; color: #C4C4C4">Cabin temp</span>
-            <span id="cabin-temperature" class="metric" style="font-size: 28px; font-weight: 600">— °C</span>
-            <span id="cabin-temperature-time" style="font-size:12px;color:#C4C4C4">Waiting for sensor</span>
-          </div>
-          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
-            <span style="font-size: 13px; color: #C4C4C4">Humidity</span>
-            <span id="cabin-humidity" class="metric" style="font-size: 28px; font-weight: 600">— %</span>
-            <span id="cabin-humidity-time" style="font-size:12px;color:#C4C4C4">Waiting for sensor</span>
-          </div>
-          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
-            <span style="font-size: 13px; color: #C4C4C4">Sea temp</span>
-            <span class="metric" style="font-size: 28px; font-weight: 600">19.8 °C</span>
-            <span style="font-size:12px;color:#C4C4C4">Sample value</span>
-          </div>
-        </div>
-        <p id="cabin-sensor-status" style="margin: 0; font-size: 13px; color: #C4C4C4; text-align: right; align-self: flex-end">Cabin sensor readings refresh every five minutes.</p>
+
       </div>
     </div>
   </section>
@@ -124,7 +109,6 @@ a{color:inherit}
           <tbody id="trip-rows"><tr><td colspan="7" style="padding:16px;color:#6B7280">Loading recorded trips…</td></tr></tbody>
         </table>
       </div>
-      <p style="margin: -14px 0 0; font-size: 13px; color: #6B7280">Port names are matched to GPS positions; coordinates remain available below each route. Place data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p>
     </div>
   </section>
 
@@ -132,11 +116,10 @@ a{color:inherit}
     <div class="boat-status-inner">
       <div class="boat-status-head"><div><h2 id="boat-status-title">Boat Status</h2><p>Cabin conditions and movement sensor activity over time.</p></div></div>
       <div class="boat-status-grid">
-        <article class="boat-status-card">
+        <article class="boat-status-card" id="cabin-chart" style="scroll-margin-top:24px">
           <h3>Temperature and humidity</h3>
           <p id="sensor-chart-summary">Live sensor readings · collected every five minutes</p>
           <div class="sensor-chart-frame"><svg id="sensor-chart" class="boat-chart" viewBox="0 0 640 260" role="img" tabindex="0" aria-describedby="sensor-chart-help" aria-label="Waiting for cabin temperature and humidity readings"></svg><div class="sensor-tooltip" id="sensor-tooltip" role="status" hidden></div></div><p id="sensor-chart-help" class="chart-help">Hover or tap to see readings. Use arrow keys when the chart is focused.</p>
-          <p id="sensor-last-updated" style="margin:10px 0 0;color:#6B7280;font-size:12px" role="status">Waiting for the first sensor reading.</p>
           <div class="boat-status-legend"><span><i class="legend-dot"></i>Temperature · °C</span><span><i class="legend-dot humidity"></i>Humidity · %</span></div>
         </article>
         <article class="boat-status-card movement-card" id="motion" style="scroll-margin-top:24px">
@@ -148,12 +131,18 @@ a{color:inherit}
             <div class="boat-status-legend"><span><i class="legend-dot" style="background:#32834d"></i>Movement</span><span><i class="legend-dot" style="background:#c34f3f"></i>Buzzer alarm</span></div>
             <div id="movement-events" class="movement-events" aria-label="Recent motion and alarm events"></div>
           </div>
-          <p id="motion-updated" class="movement-caption">Waiting for the Pi.</p>
         </article>
       </div>
     </div>
   </section>
 
+  <section id="internet" class="internet-section" aria-labelledby="internet-title">
+    <article class="internet-card">
+      <div class="internet-heading"><h2 id="internet-title">Internet connection</h2><span id="internet-current" class="alarm-live" data-online="false" role="status">Waiting for Pi contact</span></div>
+      <svg id="internet-chart" viewBox="0 0 1200 108" role="img" aria-label="Pi internet contact during the last 24 hours"></svg>
+      <div class="boat-status-legend"><span><i class="legend-dot" style="background:#32834d"></i>Contact confirmed</span><span><i class="legend-dot" style="background:#c34f3f"></i>No contact</span><span><i class="legend-dot" style="background:#dce3df"></i>No data</span></div>
+    </article>
+  </section>
 
   <footer class="footer site-footer"><div class="site-footer-row"><span class="footer-note">NMEA 2000 data obtained using <a href="https://www.yachtd.com/" target="_blank" rel="noopener noreferrer">YachtDevice</a></span><div class="project-links"><span>Project hosted at GitHub</span><a href="https://github.com/kisero/kisero.org" target="_blank" rel="noopener noreferrer">Website</a><a href="https://github.com/kisero/raspberry-pi-kisero" target="_blank" rel="noopener noreferrer">Raspberry Pi system</a></div><nav class="language-flags" aria-label="Language"><button type="button" data-language="en" lang="en" title="English" aria-label="English"><span aria-hidden="true">🇬🇧</span></button><button type="button" data-language="es" lang="es" title="Español" aria-label="Español"><span aria-hidden="true">🇪🇸</span></button><button type="button" data-language="hr" lang="hr" title="Hrvatski" aria-label="Hrvatski"><span aria-hidden="true">🇭🇷</span></button><button type="button" data-language="sk" lang="sk" title="Slovenčina" aria-label="Slovenčina"><span aria-hidden="true">🇸🇰</span></button></nav></div></footer>
 </div>
@@ -163,7 +152,6 @@ a{color:inherit}
 (()=>{
   const API="https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
   const sensorSvg=document.getElementById('sensor-chart');
-  const sensorStatus=document.getElementById('sensor-last-updated');
   let hasSensorData=false;
   const svgNode=(name,attributes={},text='')=>{const node=document.createElementNS('http://www.w3.org/2000/svg',name);for(const [key,value] of Object.entries(attributes))node.setAttribute(key,String(value));if(text)node.textContent=text;return node;};
   const sensorTime=value=>new Date(value).toLocaleString(window.KiseroI18n.locale,{dateStyle:'medium',timeStyle:'short'});
@@ -229,20 +217,17 @@ a{color:inherit}
       drawSensorChart(samples);
       if(!samples.length){
         document.getElementById('cabin-temperature').textContent='— °C';document.getElementById('cabin-humidity').textContent='— %';
-        document.getElementById('cabin-temperature-time').textContent='Waiting for sensor';document.getElementById('cabin-humidity-time').textContent='Waiting for sensor';
-        document.getElementById('cabin-sensor-status').textContent='Waiting for the first cabin sensor report.';sensorStatus.textContent='No sensor readings received yet.';hasSensorData=false;return;
+
+        document.getElementById('cabin-sensor-status').textContent='Waiting for the first cabin sensor report.';hasSensorData=false;return;
       }
       const latest=samples.reduce((newest,sample)=>Date.parse(sample.observedAt)>Date.parse(newest.observedAt)?sample:newest,samples[0]);
       const time=sensorTime(latest.observedAt),ageMinutes=Math.max(0,Math.floor((Date.now()-Date.parse(latest.observedAt))/60000));
       document.getElementById('cabin-temperature').textContent=`${Number(latest.temperatureC).toFixed(1)} °C`;document.getElementById('cabin-humidity').textContent=`${Number(latest.humidityPct).toFixed(1)} %`;
-      document.getElementById('cabin-temperature-time').textContent=`Updated ${time}`;document.getElementById('cabin-humidity-time').textContent=`Updated ${time}`;
       const freshness=ageMinutes>15?`Last report ${ageMinutes} minutes ago`:`Updated ${time}`;
       document.getElementById('cabin-sensor-status').textContent=`${freshness} · new readings every five minutes`;
-      sensorStatus.textContent=`Latest report ${time} · ${samples.length} samples retained for the chart`;
       hasSensorData=true;
     }catch(error){
       document.getElementById('cabin-sensor-status').textContent=hasSensorData?'Live sensor feed unavailable; showing the last report.':'Sensor feed is not available yet.';
-      sensorStatus.textContent=hasSensorData?'Could not refresh the latest sensor history.':'Could not load sensor readings.';
     }
   }
   refreshSensorReadings();setInterval(refreshSensorReadings,300000);
@@ -324,6 +309,7 @@ a{color:inherit}
   const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Last recorded GPS position').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
 </script>
-<script src="assets/alarm.js?v=20261028-layout" defer></script>
+<script src="assets/connectivity.js?v=20261028-connectivity" defer></script>
+<script src="assets/alarm.js?v=20261028-connectivity" defer></script>
 </body>
 </html>

@@ -15,7 +15,7 @@ function merge(packet){
  if(packet.event&&!events.some(e=>e.id===packet.event.id))events.push(packet.event);
  events=events.filter(e=>Date.parse(e.observedAt)>Date.now()-86400000).sort((a,b)=>a.observedAt.localeCompare(b.observedAt)).slice(-500);
  model={...model,...packet};render();
- window.dispatchEvent(new CustomEvent('kisero-alarm-update'));
+ window.dispatchEvent(new CustomEvent('kisero-alarm-update',{detail:packet}));
 }
 function render(){
  if(!model)return;
@@ -32,7 +32,6 @@ function render(){
   $('motion-live').textContent=fresh?(socket?.readyState===1?'Live updates':'Reconnecting live feed'):'Pi offline';
   $('motion-live').dataset.online=String(!!fresh&&socket?.readyState===1);
  }
- if($('motion-updated'))$('motion-updated').textContent=d?`Last Pi contact: ${format(d.reportedAt)} · Last 24 hours · Times shown in your local time`:'Waiting for the Pi to report. Motion history will appear here.';
  draw();
  if($('movement-events')){
   const labels={motion:'Movement detected',armed:'Alarm turned on · exit delay',disarmed:'Alarm turned off',triggered:'Buzzer alarm triggered',silenced:'Buzzer stopped',ready:'Motion sensor ready'};

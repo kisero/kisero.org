@@ -77,10 +77,11 @@ The footer uses four flag buttons with accessible language names instead of a
 select menu. Its GitHub text and links are 14px and share one desktop row with
 the attribution and flags; smaller screens wrap naturally. The motion card lists
 only the three latest events; its timeline still uses the full recent history.
-The two status cards size independently rather than stretching to equal height.
+The two status cards use the same desktop grid height so their bottom edges align.
 
-The hero removes live wind tiles and aligns the cabin/humidity/sea tiles and
-sensor freshness report to the right. Its right-side boat button shows only
+The hero removes live wind and sea-temperature tiles. A compact upper-left
+temperature/humidity badge links to the cabin chart, with the sensor freshness
+report below linking to the internet timeline. Its right-side boat button shows only
 `Moored (location)` or `Sailing (location)` and opens the location map. The current
 state is explicitly configured in `assets/boat-status.json` as moored at Puerto
 Banús; it is not inferred from an old sailing session. Automatic live state
@@ -88,3 +89,20 @@ changes require connecting the GPS publisher. The button's tooltip identifies
 this limitation, and the map uses the last GPS endpoint rather than the start of
 an old trip. Future boat status changes should update this source or replace it
 with an authenticated GPS feed.
+
+
+## Internet timeline and compact telemetry
+
+The freshness-report link scrolls to a full-width, 24-hour internet timeline.
+`assets/connectivity.js` uses the authenticated Pi heartbeat receipt history
+included in `/v1/alarm` and its live WebSocket updates. Green means a successful
+Pi→AWS contact within the 90-second grace period; red means no contact; gray
+means no data, including time before monitoring began. Missing contact can also
+mean the Pi is powered off. If the viewer loses its own live data feed, the
+unobserved tail is unknown rather than fabricated as a Pi outage. No outage log
+is shown. Backend storage and deployment live in `raspberry-pi-kisero`.
+
+Temperature/humidity and movement cards share equal desktop heights, with only
+three recent movement events. Extra last-contact, sensor-history and place-data
+paragraphs were removed from the visible page; timestamps remain in tooltips
+and the raw API data. Sensor sample age and internet reachability are separate.
