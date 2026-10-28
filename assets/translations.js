@@ -1487,5 +1487,35 @@ window.KiseroMessages=[
   "Biblioteca JavaScript para mapas interactivos",
   "JavaScript biblioteka za interaktivne karte",
   "Knižnica JavaScript na interaktívne mapy"
+ ],
+ [
+  "Moored ({0})",
+  "Amarrado ({0})",
+  "Na vezu ({0})",
+  "Vyviazaná ({0})"
+ ],
+ [
+  "Sailing ({0})",
+  "Navegando ({0})",
+  "U plovidbi ({0})",
+  "Na plavbe ({0})"
+ ],
+ [
+  "Configured berth; live GPS is not connected.",
+  "Amarre configurado; el GPS en directo no está conectado.",
+  "Postavljeni vez; GPS uživo nije povezan.",
+  "Nastavené miesto kotvenia; živé GPS nie je pripojené."
+ ],
+ [
+  "Last recorded GPS position; live GPS is not connected.",
+  "Última posición GPS registrada; el GPS en directo no está conectado.",
+  "Posljednji zabilježeni GPS položaj; GPS uživo nije povezan.",
+  "Posledná zaznamenaná GPS poloha; živé GPS nie je pripojené."
+ ],
+ [
+  "Last recorded GPS position",
+  "Última posición GPS registrada",
+  "Posljednji zabilježeni GPS položaj",
+  "Posledná zaznamenaná GPS poloha"
  ]
 ];

@@ -24,9 +24,9 @@
     @media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bottom-grid{grid-template-columns:1fr}.title-row{align-items:flex-start;flex-direction:column}.tag{align-self:flex-start}.chart{height:190px}}
     @media(max-width:480px){.top-inner,.main,.footer-inner{width:min(100% - 28px,1100px)}.top-inner{padding-top:18px}.nav{margin-bottom:28px}.panel{padding:16px}.stat{padding:14px}.readings{grid-template-columns:1fr}.download{align-items:flex-start;flex-direction:column}.map-frame{height:370px}.chart-card{padding:14px 12px}.chart{height:175px}}
   </style>
-<link rel="stylesheet" href="assets/site-ui.css?v=20261028-languages">
-<script src="assets/translations.js?v=20261028-languages"></script>
-<script src="assets/i18n.js?v=20261028-languages"></script>
+<link rel="stylesheet" href="assets/site-ui.css?v=20261028-layout">
+<script src="assets/translations.js?v=20261028-layout"></script>
+<script src="assets/i18n.js?v=20261028-layout"></script>
 </head>
 <body>
   <header class="top"><div class="top-inner">
@@ -92,7 +92,7 @@
       </section>
     </div>
   </main>
-<footer class="footer"><div class="footer-inner"><span>KISERO · Beneteau First 27 SE</span><span>Times shown as recorded; the source file has no timezone.</span></div><div class="site-footer-tools"><div class="project-links"><span>Project hosted at GitHub</span><a href="https://github.com/kisero/kisero.org" target="_blank" rel="noopener noreferrer">Website</a><a href="https://github.com/kisero/raspberry-pi-kisero" target="_blank" rel="noopener noreferrer">Raspberry Pi system</a></div><label class="language-picker"><span>Language</span><select data-language-picker aria-label="Language"><option value="en" lang="en">English</option><option value="es" lang="es">Español</option><option value="hr" lang="hr">Hrvatski</option><option value="sk" lang="sk">Slovenčina</option></select></label></div></footer>
+<footer class="footer site-footer"><div class="site-footer-row"><span class="footer-note">Times shown as recorded; the source file has no timezone.</span><div class="project-links"><span>Project hosted at GitHub</span><a href="https://github.com/kisero/kisero.org" target="_blank" rel="noopener noreferrer">Website</a><a href="https://github.com/kisero/raspberry-pi-kisero" target="_blank" rel="noopener noreferrer">Raspberry Pi system</a></div><nav class="language-flags" aria-label="Language"><button type="button" data-language="en" lang="en" title="English" aria-label="English"><span aria-hidden="true">🇬🇧</span></button><button type="button" data-language="es" lang="es" title="Español" aria-label="Español"><span aria-hidden="true">🇪🇸</span></button><button type="button" data-language="hr" lang="hr" title="Hrvatski" aria-label="Hrvatski"><span aria-hidden="true">🇭🇷</span></button><button type="button" data-language="sk" lang="sk" title="Slovenčina" aria-label="Slovenčina"><span aria-hidden="true">🇸🇰</span></button></nav></div></footer>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="assets/sailing-stats.js"></script>
   <script>

@@ -20,9 +20,9 @@ a{color:inherit}
 #trip-rows .trip-row{cursor:pointer;transition:background-color .15s}#trip-rows .trip-row:hover,#trip-rows .trip-row:focus-within{background:#f0f6f3}#trip-rows .trip-row a:focus-visible{outline:2px solid #28745e;outline-offset:4px;border-radius:3px}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
-<link rel="stylesheet" href="assets/site-ui.css?v=20261028-languages">
-<script src="assets/translations.js?v=20261028-languages"></script>
-<script src="assets/i18n.js?v=20261028-languages"></script>
+<link rel="stylesheet" href="assets/site-ui.css?v=20261028-layout">
+<script src="assets/translations.js?v=20261028-layout"></script>
+<script src="assets/i18n.js?v=20261028-layout"></script>
 </head>
 <body>
 <div style="font-family: inherit; color: #1E2433; background: #FFFFFF; min-height: 100vh">
@@ -33,12 +33,7 @@ a{color:inherit}
       <div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
 
         <div class="status-pills">
-          <div style="display: inline-flex; align-self: flex-start; align-items: center; gap: 10px; padding: 8px 16px 8px 12px; border-radius: 999px; background: #FFFFFF29; border: 1px solid #FFFFFF80">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 4px #FFFFFF29"></span>
-            <span id="latest-status" style="font-weight: 600; font-size: 15px">Loading latest sail…</span>
-            <span id="latest-status-detail" style="font-size: 14px; color: #C4C4C4">Boat data is loading</span>
-            <button id="locate-open" type="button" style="padding: 0; border: 0; background: transparent; color: #FFFFFF; font: 600 14px 'DM Sans',sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Locate</button>
-          </div>
+          <button id="locate-open" class="boat-location-pill" type="button" title="Configured berth; live GPS is not connected."><span class="boat-status-dot" aria-hidden="true"></span><span id="latest-status">Moored (Puerto Banús)</span></button>
           <a id="alarm-badge" class="alarm-pill" href="#motion" data-state="off"><span class="alarm-dot"></span><span id="alarm-label">Alarm (…)</span></a>
         </div>
 
@@ -47,20 +42,7 @@ a{color:inherit}
           <h1 style="margin: 0; font-size: 72px; line-height: 1; font-weight: 800; letter-spacing: 0.02em; font-style: italic">KISERO</h1>
           <p style="margin: 0; font-size: 20px; color: #C4C4C4; font-weight: 300">Beneteau First 27 SE · sailing out of Puerto Banús, Spain</p>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px">
-          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
-            <span style="font-size: 13px; color: #C4C4C4">Wind speed (TWS)</span>
-            <span class="metric" style="font-size: 28px; font-weight: 600">14 kn</span>
-            <span style="font-size:12px;color:#C4C4C4">Sample value</span>
-          </div>
-          <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
-            <span style="font-size: 13px; color: #C4C4C4">Wind direction (TWD)</span>
-            <span class="metric" style="font-size: 28px; font-weight: 600; display: flex; align-items: center; gap: 10px">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate(125deg)"><path d="M12 3v18"></path><path d="M6 15l6 6 6-6"></path></svg>
-              NW 305°
-            </span>
-            <span style="font-size:12px;color:#C4C4C4">Sample value</span>
-          </div>
+        <div class="hero-sensor-tiles">
           <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
             <span style="font-size: 13px; color: #C4C4C4">Cabin temp</span>
             <span id="cabin-temperature" class="metric" style="font-size: 28px; font-weight: 600">— °C</span>
@@ -77,7 +59,7 @@ a{color:inherit}
             <span style="font-size:12px;color:#C4C4C4">Sample value</span>
           </div>
         </div>
-        <p id="cabin-sensor-status" style="margin: 0; font-size: 13px; color: #C4C4C4">Cabin sensor readings refresh every five minutes.</p>
+        <p id="cabin-sensor-status" style="margin: 0; font-size: 13px; color: #C4C4C4; text-align: right; align-self: flex-end">Cabin sensor readings refresh every five minutes.</p>
       </div>
     </div>
   </section>
@@ -173,12 +155,7 @@ a{color:inherit}
   </section>
 
 
-  <footer style="background: #111111; color: #C4C4C4">
-    <div style="max-width: 1200px; margin: 0 auto; padding: 28px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px">
-      <span>kisero.org · First 27 SE · CRO 2882</span>
-      <span>NMEA 2000 data obtained using <a href="https://www.yachtd.com/" target="_blank" rel="noopener noreferrer">YachtDevice</a></span>
-    </div>
-  <div class="site-footer-tools"><div class="project-links"><span>Project hosted at GitHub</span><a href="https://github.com/kisero/kisero.org" target="_blank" rel="noopener noreferrer">Website</a><a href="https://github.com/kisero/raspberry-pi-kisero" target="_blank" rel="noopener noreferrer">Raspberry Pi system</a></div><label class="language-picker"><span>Language</span><select data-language-picker aria-label="Language"><option value="en" lang="en">English</option><option value="es" lang="es">Español</option><option value="hr" lang="hr">Hrvatski</option><option value="sk" lang="sk">Slovenčina</option></select></label></div></footer>
+  <footer class="footer site-footer"><div class="site-footer-row"><span class="footer-note">NMEA 2000 data obtained using <a href="https://www.yachtd.com/" target="_blank" rel="noopener noreferrer">YachtDevice</a></span><div class="project-links"><span>Project hosted at GitHub</span><a href="https://github.com/kisero/kisero.org" target="_blank" rel="noopener noreferrer">Website</a><a href="https://github.com/kisero/raspberry-pi-kisero" target="_blank" rel="noopener noreferrer">Raspberry Pi system</a></div><nav class="language-flags" aria-label="Language"><button type="button" data-language="en" lang="en" title="English" aria-label="English"><span aria-hidden="true">🇬🇧</span></button><button type="button" data-language="es" lang="es" title="Español" aria-label="Español"><span aria-hidden="true">🇪🇸</span></button><button type="button" data-language="hr" lang="hr" title="Hrvatski" aria-label="Hrvatski"><span aria-hidden="true">🇭🇷</span></button><button type="button" data-language="sk" lang="sk" title="Slovenčina" aria-label="Slovenčina"><span aria-hidden="true">🇸🇰</span></button></nav></div></footer>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="assets/sailing-stats.js"></script>
@@ -271,7 +248,10 @@ a{color:inherit}
   refreshSensorReadings();setInterval(refreshSensorReadings,300000);
   const rows=document.getElementById('trip-rows');
   const status=document.getElementById('latest-status');
-  const detail=document.getElementById('latest-status-detail');
+  fetch('assets/boat-status.json').then(response=>{if(!response.ok)throw new Error();return response.json();}).then(boat=>{
+    if(!['moored','sailing'].includes(boat.state)||typeof boat.location!=='string')return;
+    status.textContent=`${boat.state==='sailing'?'Sailing':'Moored'} (${boat.location})`;
+  }).catch(()=>{});
   let boatPosition=null, map=null, boatMarker=null;
   const fmtDate=value=>{const [day,time=""]=value.split('T');return new Date(`${day}T00:00:00Z`).toLocaleDateString(window.KiseroI18n.locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})+(time?` · ${time.slice(0,5)}`:'')};
   const duration=(start,end)=>{const a=new Date(`${start}Z`),b=new Date(`${end}Z`),mins=Math.max(0,Math.round((b-a)/60000));return `${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`};
@@ -290,10 +270,8 @@ a{color:inherit}
   };
   fetch(`${API}/v1/trips`).then(response=>{if(!response.ok)throw new Error('Trip data is temporarily unavailable.');return response.json()}).then(async payload=>{
     const trips=payload.trips||[];
-    if(!trips.length){status.textContent='No recorded sail yet';detail.textContent='The boat log will appear here after its first upload';rows.innerHTML='<tr><td colspan="7" style="padding:16px;color:#6B7280">No sailing sessions recorded yet.</td></tr>';return;}
+    if(!trips.length){rows.innerHTML='<tr><td colspan="7" style="padding:16px;color:#6B7280">No sailing sessions recorded yet.</td></tr>';return;}
     const latest=trips[0];
-    status.textContent=`Latest recorded sail · ${fmtDate(latest.start)}`;
-    detail.textContent=`${latest.averageSogKn} kn average · ${latest.maxSogKn} kn top speed`;
     document.getElementById('season-distance').textContent=`${trips.reduce((sum,trip)=>sum+Number(trip.distanceNm||0),0).toFixed(1)} nm`;
     const underwayMinutes=trips.reduce((sum,trip)=>sum+Math.max(0,Math.round((new Date(`${trip.end}Z`)-new Date(`${trip.start}Z`))/60000)),0);document.getElementById('season-duration').textContent=`${Math.floor(underwayMinutes/60)} h ${String(underwayMinutes%60).padStart(2,'0')} m`;
     document.getElementById('season-trips').textContent=String(trips.length);
@@ -341,11 +319,11 @@ a{color:inherit}
       tr.append(wind);
       rows.append(tr);
     }
-    const latestTrack=detailsById.get(latest.id)?.track,point=latestTrack?.[0];if(point){const lat=Number(point[1]),lon=Number(point[0]);boatPosition=[lat,lon];document.getElementById('boat-coordinates').textContent=`${Math.abs(lat).toFixed(4)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(4)}° ${lon>=0?'E':'W'}`;document.querySelector('.locate-sample').textContent='First GPS position in the latest recorded track';document.getElementById('boat-speed').textContent=`${latest.averageSogKn} kn avg`;if(map&&boatMarker){boatMarker.setLatLng(boatPosition);map.setView(boatPosition,13);}}
-  }).catch(error=>{status.textContent='Boat data temporarily unavailable';detail.textContent=error.message;rows.innerHTML='<tr><td colspan="7" style="padding:16px;color:#8A5300">Trip summaries could not be loaded. Try the sailing log again shortly.</td></tr>';});
-  const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Latest sailing area').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
+    const latestTrack=detailsById.get(latest.id)?.track,point=latestTrack?.at(-1);if(point){const lat=Number(point[1]),lon=Number(point[0]);boatPosition=[lat,lon];document.getElementById('boat-coordinates').textContent=`${Math.abs(lat).toFixed(4)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(4)}° ${lon>=0?'E':'W'}`;document.querySelector('.locate-sample').textContent='Last recorded GPS position; live GPS is not connected.';document.getElementById('boat-speed').textContent=`${Number(point[3]).toFixed(1)} kn`;if(map&&boatMarker){boatMarker.setLatLng(boatPosition);map.setView(boatPosition,13);}}
+  }).catch(error=>{rows.innerHTML='<tr><td colspan="7" style="padding:16px;color:#8A5300">Trip summaries could not be loaded. Try the sailing log again shortly.</td></tr>';});
+  const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Last recorded GPS position').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
 </script>
-<script src="assets/alarm.js?v=20261028-languages" defer></script>
+<script src="assets/alarm.js?v=20261028-layout" defer></script>
 </body>
 </html>

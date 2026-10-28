@@ -36,7 +36,7 @@ function render(){
  draw();
  if($('movement-events')){
   const labels={motion:'Movement detected',armed:'Alarm turned on · exit delay',disarmed:'Alarm turned off',triggered:'Buzzer alarm triggered',silenced:'Buzzer stopped',ready:'Motion sensor ready'};
-  $('movement-events').innerHTML=events.slice().reverse().slice(0,40).map(e=>`<div class="movement-event" data-kind="${esc(e.kind)}"><time datetime="${esc(e.observedAt)}">${esc(format(e.observedAt))}</time><strong>${esc(e.kind==='motion'&&!e.motion?'Movement cleared':labels[e.kind]||e.kind)}</strong></div>`).join('')||'<p class="movement-empty">No recorded motion events in the last 24 hours.</p>';
+  $('movement-events').innerHTML=events.slice().reverse().slice(0,3).map(e=>`<div class="movement-event" data-kind="${esc(e.kind)}"><time datetime="${esc(e.observedAt)}">${esc(format(e.observedAt))}</time><strong>${esc(e.kind==='motion'&&!e.motion?'Movement cleared':labels[e.kind]||e.kind)}</strong></div>`).join('')||'<p class="movement-empty">No recorded motion events in the last 24 hours.</p>';
  }
  if(admin){
   $('alarm-current').textContent=`Alarm (${state}) · ${detail}`;

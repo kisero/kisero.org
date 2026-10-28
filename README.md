@@ -72,3 +72,19 @@ selects the closest actual sample by timestamp and shows its date/time,
 temperature and humidity, with a vertical guide and markers on both series.
 Left/right arrows move between samples; Home/End select the first/last, Escape
 hides the tooltip. It uses original samples, not interpolated measurements.
+
+The footer uses four flag buttons with accessible language names instead of a
+select menu. Its GitHub text and links are 14px and share one desktop row with
+the attribution and flags; smaller screens wrap naturally. The motion card lists
+only the three latest events; its timeline still uses the full recent history.
+The two status cards size independently rather than stretching to equal height.
+
+The hero removes live wind tiles and aligns the cabin/humidity/sea tiles and
+sensor freshness report to the right. Its right-side boat button shows only
+`Moored (location)` or `Sailing (location)` and opens the location map. The current
+state is explicitly configured in `assets/boat-status.json` as moored at Puerto
+Banús; it is not inferred from an old sailing session. Automatic live state
+changes require connecting the GPS publisher. The button's tooltip identifies
+this limitation, and the map uses the last GPS endpoint rather than the start of
+an old trip. Future boat status changes should update this source or replace it
+with an authenticated GPS feed.

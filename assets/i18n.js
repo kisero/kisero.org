@@ -51,9 +51,13 @@
   document.addEventListener('DOMContentLoaded',()=>{
     document.title=t(document.title);
     translate(document.body);
-    document.querySelectorAll('[data-language-picker]').forEach(select=>{
-      select.value=lang;
-      select.addEventListener('change',()=>{if(!Object.hasOwn(locales,select.value))return;try{localStorage.setItem('kisero-language',select.value);}catch(_){}const url=new URL(location.href);url.searchParams.set('lang',select.value);location.href=url.href;});
+    document.querySelectorAll('[data-language]').forEach(button=>{
+      button.setAttribute('aria-pressed',String(button.dataset.language===lang));
+      button.addEventListener('click',()=>{
+        const next=button.dataset.language;if(!Object.hasOwn(locales,next)||next===lang)return;
+        try{localStorage.setItem('kisero-language',next);}catch(_){}
+        const url=new URL(location.href);url.searchParams.set('lang',next);location.href=url.href;
+      });
     });
     new MutationObserver(records=>{
       const roots=new Set();for(const record of records){if(record.type==='characterData')text(record.target);else if(record.type==='attributes')labels(record.target);else for(const node of record.addedNodes)roots.add(node);}
