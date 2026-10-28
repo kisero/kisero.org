@@ -26,7 +26,6 @@ function render(){
  let detail=!fresh?'Pi offline':pending?'Applying change…':!d.ready?'Sensor warming up':delay?'Exit delay':d.sounding?'Motion alarm sounding':d.motion?'Movement detected':'No movement';
  if(!fresh&&c.armed!==d?.armed)detail='Pi offline · change pending';
  if($('alarm-label'))$('alarm-label').textContent=`Alarm (${state})`;
- if($('alarm-detail'))$('alarm-detail').textContent=detail;
  if($('alarm-badge'))$('alarm-badge').dataset.state=d?.sounding?'triggered':d?.armed?'on':'off';
  if($('motion-status'))$('motion-status').textContent=detail;
  if($('motion-live')){
