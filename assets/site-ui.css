@@ -5,10 +5,10 @@
 
 .hero-status-row{flex-direction:column;align-items:flex-end;justify-content:flex-start;gap:10px}.hero-status-row .status-pills{margin-left:0;justify-content:flex-end}.hero-status-row .sensor-report-link{max-width:none;text-align:right}.internet-section{padding:0;max-width:none}.internet-inner{max-width:1200px;margin:0 auto;padding:0 24px 52px}@media(max-width:720px){.internet-inner{padding:0 20px 40px}}
 
-/* Keep the boat identity high on the left and the freshness report low on the right. */
-.hero-inner{max-width:1200px;margin:0 auto;padding:56px 24px}
-.hero-layout{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:40px;min-height:200px}
+/* Keep the boat identity high left and group telemetry at the bottom right. */
+.hero-inner{max-width:1200px;margin:0 auto;padding:56px 24px 24px}
+.hero-layout{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:40px;min-height:232px}
 .hero-title{grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:12px;min-width:0;align-self:start}
-.hero-status-row{grid-column:2;grid-row:1;justify-content:space-between;min-width:0}
+.hero-status-row{grid-column:2;grid-row:1;justify-content:flex-end;gap:10px;min-width:0}
 @media(max-width:1050px){.hero-layout{grid-template-columns:1fr;gap:28px;min-height:0}.hero-title{grid-column:1;grid-row:1}.hero-status-row{grid-column:1;grid-row:2;gap:16px}}
-@media(max-width:600px){.hero-inner{padding:40px 20px}}
+@media(max-width:600px){.hero-inner{padding:40px 20px 24px}}

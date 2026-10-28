@@ -20,9 +20,9 @@ a{color:inherit}
 #trip-rows .trip-row{cursor:pointer;transition:background-color .15s}#trip-rows .trip-row:hover,#trip-rows .trip-row:focus-within{background:#f0f6f3}#trip-rows .trip-row a:focus-visible{outline:2px solid #28745e;outline-offset:4px;border-radius:3px}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
-<link rel="stylesheet" href="assets/site-ui.css?v=20261028-hero-position">
-<script src="assets/translations.js?v=20261028-hero-position"></script>
-<script src="assets/i18n.js?v=20261028-hero-position"></script>
+<link rel="stylesheet" href="assets/site-ui.css?v=20261028-hero-bottom">
+<script src="assets/translations.js?v=20261028-hero-bottom"></script>
+<script src="assets/i18n.js?v=20261028-hero-bottom"></script>
 </head>
 <body>
 <div style="font-family: inherit; color: #1E2433; background: #FFFFFF; min-height: 100vh">
@@ -310,7 +310,7 @@ a{color:inherit}
   const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Last recorded GPS position').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
 </script>
-<script src="assets/connectivity.js?v=20261028-hero-position" defer></script>
-<script src="assets/alarm.js?v=20261028-hero-position" defer></script>
+<script src="assets/connectivity.js?v=20261028-hero-bottom" defer></script>
+<script src="assets/alarm.js?v=20261028-hero-bottom" defer></script>
 </body>
 </html>

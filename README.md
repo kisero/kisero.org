@@ -81,7 +81,7 @@ The two status cards use the same desktop grid height so their bottom edges alig
 
 The hero removes live wind and sea-temperature tiles. A compact right-aligned temperature/humidity badge sits immediately before the
 moored and alarm badges and links to the cabin chart. The sensor freshness
-report sits below all three badges at the lower right of the hero and links to the internet timeline. The boat name and description align to the upper left; smaller screens stack the identity above the telemetry. Its right-side boat button shows only
+report sits directly below all three badges, grouped together at the bottom right of the hero and links to the internet timeline. The boat name and description align to the upper left; smaller screens stack the identity above the telemetry. Its right-side boat button shows only
 `Moored (location)` or `Sailing (location)` and opens the location map. The current
 state is explicitly configured in `assets/boat-status.json` as moored at Puerto
 Banús; it is not inferred from an old sailing session. Automatic live state
