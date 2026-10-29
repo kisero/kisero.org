@@ -110,3 +110,5 @@ and the raw API data. Sensor sample age and internet reachability are separate.
 
 ## Status freshness
 The hero reports the latest authenticated Pi heartbeat received by AWS, independently of sensor readings. Internet and alarm status become stale after 90 seconds; cabin readings warn in red after ten minutes (two expected cycles), with their last observation time. Sensor and heartbeat data refresh independently. The boat label uses the configured berth until a live GPS publisher is connected; its position warning is hidden for now. Connectivity never refreshes a position timestamp.
+
+The pages opt out of browser machine translation (`google=notranslate` and the `notranslate` root class). The site's flag selector owns the displayed language, including asynchronous readings; browser translation otherwise rewrites only parts of an already translated page back into the browser's preferred language. This class does not disable the site's own translation engine.
