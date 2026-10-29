@@ -14,3 +14,5 @@
 @media(max-width:600px){.hero-inner{padding:40px 20px 24px}}
 
 .data-warning{color:#b83227!important;font-weight:600}.sensor-report-link.connection-warning{color:#ff9e94}#internet-summary{margin:6px 0 0;font-size:13px}
+
+#motion-chart:focus-visible{outline:2px solid #28745e;outline-offset:2px;border-radius:8px}

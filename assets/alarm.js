@@ -5,7 +5,7 @@ const API='https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com';
 const $=id=>document.getElementById(id);
 const admin=!!$('alarm-controls');
 const capability=admin?location.hash.slice(1):'';
-let model=null,events=[],socket=null,reconnect=null,lastPacket=0,closed=false;
+let model=null,events=[],socket=null,reconnect=null,lastPacket=0,closed=false,motionSelection=null;
 const format=t=>new Date(t).toLocaleString(window.KiseroI18n.locale, {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function merge(packet){
@@ -68,9 +68,35 @@ function draw(){
  if(active!==null){const contact=Date.parse(model.device?.reportedAt);segments.push([active,Math.min(end,Number.isFinite(contact)?contact:end)]);}
  let html='<rect x="40" y="24" width="560" height="42" rx="7" fill="#edf1ef"/>';
  for(let i=0;i<=4;i++){const t=start+i*21600000;html+=`<text x="${40+i*140}" y="91" text-anchor="${i===0?'start':i===4?'end':'middle'}">${esc(new Date(t).toLocaleTimeString(window.KiseroI18n.locale,{hour:'2-digit',minute:'2-digit'}))}</text>`;}
- for(const [a,b]of segments){if(b>=a)html+=`<rect class="activity" x="${x(a)}" y="24" width="${Math.max(3,x(b)-x(a))}" height="42" rx="3"><title>Movement: ${esc(format(a))} – ${esc(format(b))}</title></rect>`;}
- for(const e of events.filter(e=>e.kind==='triggered'&&e.armed===true))html+=`<rect class="alert" x="${x(Date.parse(e.observedAt))}" y="18" width="4" height="54"><title>Buzzer triggered: ${esc(format(e.observedAt))}</title></rect>`;
+ for(const [a,b]of segments){if(b>=a)html+=`<rect class="activity" data-start="${a}" data-end="${b}" x="${x(a)}" y="24" width="${Math.max(3,x(b)-x(a))}" height="42" rx="3"><title>Movement: ${esc(format(a))} – ${esc(format(b))}</title></rect>`;}
+ for(const e of events.filter(e=>e.kind==='triggered'&&e.armed===true))html+=`<rect class="alert" data-time="${Date.parse(e.observedAt)}" x="${x(Date.parse(e.observedAt))}" y="18" width="4" height="54"><title>Buzzer triggered: ${esc(format(e.observedAt))}</title></rect>`;
  svg.innerHTML=html;
+ const tooltip=$('motion-tooltip');if(!tooltip)return;
+ const hide=()=>{motionSelection=null;tooltip.hidden=true;svg.querySelector('.motion-hover')?.remove();};
+ const show=(time,hit=null)=>{
+  time=Math.max(start,Math.min(end,time));
+  const alert=hit?.classList.contains('alert')?Number(hit.dataset.time):events.some(e=>e.kind==='triggered'&&e.armed===true&&Date.parse(e.observedAt)===time)?time:null;
+  const segment=hit?.classList.contains('activity')?[Number(hit.dataset.start),Number(hit.dataset.end)]:segments.find(([a,b])=>time>=a&&time<=b);
+  if(alert!==null)time=alert;else if(segment)time=Math.max(segment[0],Math.min(segment[1],time));
+  motionSelection=time;
+  const lines=[format(time)];
+  if(alert!==null)lines.push('Buzzer alarm triggered');
+  else if(segment)lines.push('Movement detected',`${format(segment[0])} – ${format(segment[1])}`);
+  else lines.push('No recorded alarm activity');
+  tooltip.replaceChildren();for(const text of lines){const line=document.createElement('div');line.textContent=window.KiseroI18n.t(text);tooltip.append(line);}
+  tooltip.hidden=false;
+  const frame=svg.parentElement;
+  tooltip.style.left=`${Math.max(8,Math.min(x(alert??time)/640*frame.clientWidth+12,frame.clientWidth-tooltip.offsetWidth-8))}px`;tooltip.style.top='0px';
+  svg.querySelector('.motion-hover')?.remove();
+  const guide=document.createElementNS('http://www.w3.org/2000/svg','line');
+  for(const [key,value]of Object.entries({class:'motion-hover',x1:x(alert??time),x2:x(alert??time),y1:16,y2:76,stroke:'#53615b','stroke-dasharray':'4 4','pointer-events':'none'}))guide.setAttribute(key,value);
+  svg.append(guide);
+ };
+ const point=event=>{const box=svg.getBoundingClientRect(),time=start+Math.max(0,Math.min(1,((event.clientX-box.left)/box.width*640-40)/560))*86400000;show(time,event.target.closest?.('rect'));};
+ svg.onpointermove=point;svg.onpointerdown=point;svg.onpointerleave=hide;
+ svg.onfocus=()=>show(motionSelection??end);svg.onblur=hide;
+ svg.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End','Escape'].includes(event.key)){event.preventDefault();if(event.key==='Escape')hide();else show(event.key==='Home'?start:event.key==='End'?end:(motionSelection??end)+(event.key==='ArrowLeft'?-300000:300000));}};
+ if(motionSelection!==null)show(motionSelection);
 }
 async function snapshot(){try{const r=await fetch(API+'/v1/alarm',{cache:'no-store'});if(!r.ok)throw Error();const p=await r.json();merge(p);connect(p.websocketUrl);}catch(e){if($('motion-live')){$('motion-live').textContent='Feed unavailable';$('motion-live').dataset.online='false';}if($('alarm-message'))$('alarm-message').textContent='Cannot reach the alarm service. Try again shortly.';}}
 function connect(url){
