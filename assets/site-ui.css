@@ -13,4 +13,4 @@
 @media(max-width:1050px){.hero-layout{grid-template-columns:1fr;gap:28px;min-height:0}.hero-title{grid-column:1;grid-row:1}.hero-status-row{grid-column:1;grid-row:2;gap:16px}}
 @media(max-width:600px){.hero-inner{padding:40px 20px 24px}}
 
-.data-warning{color:#b83227!important;font-weight:600}.sensor-report-link.connection-warning{color:#ff9e94}#internet-summary{margin:6px 0 0;font-size:13px}#boat-position-status:empty{display:none}
+.data-warning{color:#b83227!important;font-weight:600}.sensor-report-link.connection-warning{color:#ff9e94}#internet-summary{margin:6px 0 0;font-size:13px}

@@ -115,7 +115,7 @@ a{color:inherit}
 
   <section class="boat-status" aria-labelledby="boat-status-title">
     <div class="boat-status-inner">
-      <div class="boat-status-head"><div><h2 id="boat-status-title">Boat Status</h2><p>Cabin conditions and movement sensor activity over time.</p><p id="boat-position-status" role="status"></p></div></div>
+      <div class="boat-status-head"><div><h2 id="boat-status-title">Boat Status</h2><p>Cabin conditions and movement sensor activity over time.</p></div></div>
       <div class="boat-status-grid">
         <article class="boat-status-card" id="cabin-chart" style="scroll-margin-top:24px">
           <h3>Temperature and humidity</h3>
@@ -244,11 +244,7 @@ a{color:inherit}
   fetch('assets/boat-status.json').then(response=>{if(!response.ok)throw new Error();return response.json();}).then(boat=>{
     if(!['moored','sailing'].includes(boat.state)||typeof boat.location!=='string')return;
     status.textContent=`${boat.state==='sailing'?'Sailing':'Moored'} (${boat.location})`;
-    const positionStatus=document.getElementById('boat-position-status');
-    const observed=Date.parse(boat.observedAt),stale=!Number.isFinite(observed)||Date.now()-observed>90000;
-    positionStatus.classList.toggle('data-warning',stale);
-    positionStatus.textContent=stale?(Number.isFinite(observed)?`No position readings since ${sensorTime(observed)}`:'No live position readings · using configured berth'):'';
-  }).catch(()=>{const warning=document.getElementById('boat-position-status');warning.classList.add('data-warning');warning.textContent='Boat position unavailable';});
+  }).catch(()=>{});
   let boatPosition=null, map=null, boatMarker=null;
   const fmtDate=value=>{const [day,time=""]=value.split('T');return new Date(`${day}T00:00:00Z`).toLocaleDateString(window.KiseroI18n.locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})+(time?` · ${time.slice(0,5)}`:'')};
   const duration=(start,end)=>{const a=new Date(`${start}Z`),b=new Date(`${end}Z`),mins=Math.max(0,Math.round((b-a)/60000));return `${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`};
