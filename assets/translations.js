@@ -1,5 +1,5 @@
 /* English source, Spanish, Croatian, Slovak. Parameters use {0}, {1}. */
-window.KiseroMessages=[
+window.KiseroMessages=[["No readings since {0}", "Sin lecturas desde {0}", "Nema očitanja od {0}", "Žiadne merania od {0}"], ["No position readings since {0}", "Sin lecturas de posición desde {0}", "Nema očitanja položaja od {0}", "Žiadne údaje o polohe od {0}"], ["Boat connected · Last update {0}", "Barco conectado · Última actualización {0}", "Brod povezan · Zadnje ažuriranje {0}", "Loď pripojená · Posledná aktualizácia {0}"], ["Boat connection unavailable · Last update {0}", "Conexión del barco no disponible · Última actualización {0}", "Veza s brodom nije dostupna · Zadnje ažuriranje {0}", "Spojenie s loďou nedostupné · Posledná aktualizácia {0}"], ["No live position readings · using configured berth", "Sin lecturas de posición en directo · usando el amarre configurado", "Nema očitanja položaja uživo · koristi se postavljeni vez", "Žiadne aktuálne údaje o polohe · používa sa nastavené kotvisko"], ["Boat position unavailable", "Posición del barco no disponible", "Položaj broda nije dostupan", "Poloha lode je nedostupná"],
  [
   "Language",
   "Idioma",

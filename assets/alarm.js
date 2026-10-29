@@ -27,7 +27,10 @@ function render(){
  if(!fresh&&c.armed!==d?.armed)detail='Pi offline · change pending';
  if($('alarm-label'))$('alarm-label').textContent=`Alarm (${state})`;
  if($('alarm-badge'))$('alarm-badge').dataset.state=d?.sounding?'triggered':d?.armed?'on':'off';
- if($('motion-status'))$('motion-status').textContent=detail;
+ if($('motion-status')){
+  $('motion-status').textContent=!fresh?(d?`No readings since ${format(d.reportedAt)}`:'Waiting for first Pi contact.'):detail;
+  $('motion-status').classList.toggle('data-warning',!fresh);
+ }
  if($('motion-live')){
   $('motion-live').textContent=fresh?(socket?.readyState===1?'Live updates':'Reconnecting live feed'):'Pi offline';
   $('motion-live').dataset.online=String(!!fresh&&socket?.readyState===1);

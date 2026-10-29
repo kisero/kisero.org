@@ -107,3 +107,6 @@ Temperature/humidity and movement cards share equal desktop heights, with only
 three recent movement events. Extra last-contact, sensor-history and place-data
 paragraphs were removed from the visible page; timestamps remain in tooltips
 and the raw API data. Sensor sample age and internet reachability are separate.
+
+## Status freshness
+The hero reports the latest authenticated Pi heartbeat received by AWS, independently of sensor readings. Internet and alarm status become stale after 90 seconds; cabin readings warn in red after ten minutes (two expected cycles), with their last observation time. Sensor and heartbeat data refresh independently. The position warning explicitly identifies the configured berth until a live GPS publisher is connected; connectivity never refreshes a position timestamp.

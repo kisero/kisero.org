@@ -26,6 +26,11 @@
     const last=beats.at(-1),online=sourceFresh&&last!==undefined&&end-last<grace;
     status.textContent=started===null?'Waiting for Pi contact':!sourceFresh?'Status unavailable':online?'Online':'No contact';
     status.dataset.online=String(online);
+    const header=document.getElementById('cabin-sensor-status');
+    if(header){header.textContent=last===undefined?'Waiting for Pi contact':`${online?'Boat connected':'Boat connection unavailable'} · Last update ${format(last)}`;header.classList.toggle('connection-warning',!online);}
+    const summary=document.getElementById('internet-summary');
+    if(summary){summary.textContent=online?'':last===undefined?'Waiting for Pi contact':`No readings since ${format(last)}`;summary.classList.toggle('data-warning',!online);summary.hidden=online;}
+
   }
   window.addEventListener('kisero-alarm-update',event=>{
     const packet=event.detail||{};
