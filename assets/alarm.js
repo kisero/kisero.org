@@ -151,13 +151,20 @@ if(admin){
  const refreshControl=async()=>{
   if(!privateLink)return;
   const request=++privateRequest;
-  const line=$('alarm-mode');
+  const line=$('alarm-mode'),distanceLine=$('alarm-distance');
   try{
    const response=await fetch(API+'/v1/alarm/control',{headers,cache:'no-store',signal:AbortSignal.timeout(8000)});
    if(!response.ok)throw new Error();
    const control=await response.json();
    if(request!==privateRequest)return;
    automaticAvailable=true;
+   if(distanceLine){
+    const label=Number.isInteger(control.distanceMeters)
+      ?`Distance from boat · about ${control.distanceMeters.toLocaleString(window.KiseroI18n.locale)} m`
+      :'Distance from boat unavailable · waiting for fresh GPS and OwnTracks readings';
+    distanceLine.hidden=false;
+    if(distanceLine.dataset.source!==label){distanceLine.dataset.source=label;distanceLine.textContent=label;}
+   }
    const automatic=control.mode==='auto';
    const label=automatic?`Auto · ${reasons[control.reason]||'Waiting for location'}`:'Mode · Manual';
    line.hidden=false;
@@ -167,6 +174,7 @@ if(admin){
    if(request!==privateRequest)return;
    automaticAvailable=false;
    line.hidden=true;
+   if(distanceLine)distanceLine.hidden=true;
   }
   enableControls();
  };
