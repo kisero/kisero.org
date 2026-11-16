@@ -23,7 +23,7 @@ a{color:inherit}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
 <link rel="stylesheet" href="assets/site-ui.css?v=20261029-motion-tooltip">
-<script src="assets/translations.js?v=20261116-position"></script>
+<script src="assets/translations.js?v=20261116-boat-label"></script>
 <script src="assets/i18n.js?v=20261029-motion-tooltip"></script>
 </head>
 <body>
@@ -266,12 +266,11 @@ a{color:inherit}
   let lastKnownPosition=null,positionRequestPending=false;
   const validPosition=position=>position&&['sailing','moored'].includes(position.state)&&Number.isFinite(position.observedAt);
   const positionAge=position=>Date.now()-position.observedAt*1000;
-  const setPositionLabel=(live,empty='Awaiting GPS')=>{
+  const setPositionLabel=(empty='Awaiting GPS')=>{
     let label=empty;
     if(lastKnownPosition&&positionAge(lastKnownPosition)<lastKnownPositionMs){
       const {state,location}=lastKnownPosition;
-      const description=state==='sailing'?`Sailing (${location||'At sea'})`:`Moored (${location||'Location unknown'})`;
-      label=live?description:`Last known · ${description}`;
+      label=state==='sailing'?`Sailing (${location||'At sea'})`:`Moored (${location||'Location unknown'})`;
     }
     if(status.dataset.source!==label){
       status.dataset.source=label;
@@ -282,7 +281,7 @@ a{color:inherit}
     const saved=JSON.parse(localStorage.getItem(positionCacheKey));
     if(validPosition(saved)){
       lastKnownPosition=saved;
-      setPositionLabel(positionAge(saved)<freshPositionMs,'Checking boat position…');
+      setPositionLabel('Checking boat position…');
     }
   }catch{}
   async function refreshBoatPosition(){
@@ -295,14 +294,10 @@ a{color:inherit}
       if(validPosition(boat)&&positionAge(boat)<freshPositionMs){
         lastKnownPosition={state:boat.state,location:typeof boat.location==='string'?boat.location:null,observedAt:boat.observedAt};
         try{localStorage.setItem(positionCacheKey,JSON.stringify(lastKnownPosition));}catch{}
-        setPositionLabel(true);
-      }else{
-        setPositionLabel(false);
       }
-    }catch{
-      setPositionLabel(lastKnownPosition&&positionAge(lastKnownPosition)<freshPositionMs);
-    }finally{
+    }catch{}finally{
       positionRequestPending=false;
+      setPositionLabel();
     }
   }
   refreshBoatPosition();
