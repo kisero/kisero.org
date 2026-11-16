@@ -19,10 +19,11 @@ a{color:inherit}
 .boat-status{background:#fff}.boat-status-inner{max-width:1200px;margin:0 auto;padding:52px 24px 64px}.boat-status-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:22px}.boat-status-head h2{margin:0;font:600 32px Manrope,sans-serif;letter-spacing:-.02em}.boat-status-head p{margin:6px 0 0;color:#6B7280;font-size:15px}.boat-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.boat-status-card{min-width:0;padding:20px;background:#fff;border:1px solid #E4E8EE;border-radius:14px;box-shadow:0 1px 3px #1e24330c}.boat-status-card h3{margin:0;font:700 18px Manrope,sans-serif}.boat-status-card>p{margin:4px 0 14px;color:#6B7280;font-size:13px}.boat-chart{display:block;width:100%;height:auto}.boat-chart text{fill:#78827e;font:12px "DM Sans",sans-serif}.boat-chart .chart-empty{fill:#6B7280;font:15px "DM Sans",sans-serif}.boat-chart .grid{stroke:#E5EBE8;stroke-width:1}.boat-chart .temp-line{fill:none;stroke:#28745E;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.boat-chart .humidity-line{fill:none;stroke:#3984A0;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.boat-chart .temp-dot{fill:#28745E;stroke:#fff;stroke-width:2}.boat-chart .humidity-dot{fill:#3984A0;stroke:#fff;stroke-width:2}.boat-status-legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:10px;color:#53615b;font-size:12px}.boat-status-legend span{display:inline-flex;align-items:center;gap:7px}.legend-dot{width:9px;height:9px;border-radius:50%;background:#28745E}.legend-dot.humidity{background:#3984A0}.movement-track{position:relative;margin:16px 4px 8px;height:42px;border-radius:8px;background:repeating-linear-gradient(90deg,#edf1ef 0,#edf1ef calc(25% - 1px),#dfe6e2 calc(25% - 1px),#dfe6e2 25%)}.movement-active{position:absolute;top:0;height:42px;border-radius:7px;background:#DDF1E5;border:1px solid #9AC9AA}.movement-active::after{content:"";position:absolute;top:50%;left:50%;width:10px;height:10px;border-radius:50%;background:#32834D;transform:translate(-50%,-50%);box-shadow:0 0 0 4px #32834d20}.movement-times{display:flex;justify-content:space-between;margin:0 2px;color:#78827e;font-size:11px}.movement-events{display:grid;gap:0;margin-top:18px}.movement-event{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #EEF1EF;font-size:13px}.movement-event time{min-width:54px;color:#6B7280;font-variant-numeric:tabular-nums}.movement-event strong{font-weight:600}.movement-caption{margin:14px 0 0;color:#8A5300;font-size:12px}.movement-card{display:flex;flex-direction:column}.movement-card .movement-chart-area{flex:1}
 @media(max-width:720px){.boat-status-inner{padding:40px 20px 48px}.boat-status-grid{grid-template-columns:1fr}.boat-status-head h2{font-size:28px}}
 #trip-rows .trip-row{cursor:pointer;transition:background-color .15s}#trip-rows .trip-row:hover,#trip-rows .trip-row:focus-within{background:#f0f6f3}#trip-rows .trip-row a:focus-visible{outline:2px solid #28745e;outline-offset:4px;border-radius:3px}
+#movement-events:empty{display:none}.chart-range{display:inline-flex;gap:4px;padding:4px;background:#eef1f5;border-radius:10px}.chart-range button{font:inherit;font-size:14px;color:#4b5563;background:transparent;border:0;border-radius:7px;padding:8px 12px;cursor:pointer;white-space:nowrap}.chart-range button[aria-pressed=true]{background:#fff;color:#1e2433;box-shadow:0 1px 3px #1e24331a}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
 <link rel="stylesheet" href="assets/site-ui.css?v=20261029-motion-tooltip">
-<script src="assets/translations.js?v=20261116-boat"></script>
+<script src="assets/translations.js?v=20261116-history"></script>
 <script src="assets/i18n.js?v=20261029-motion-tooltip"></script>
 </head>
 <body>
@@ -86,7 +87,7 @@ a{color:inherit}
     <div style="max-width: 1200px; margin: 0 auto; padding: 64px 24px 32px; display: flex; flex-direction: column; gap: 24px">
       <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
         <div style="display: flex; flex-direction: column; gap: 6px">
-          <h2 style="margin: 0; font-size: 32px; font-weight: 600; letter-spacing: -0.01em">Sailing log</h2>
+          <h2 style="margin: 0; font-size: 32px; font-weight: 600; letter-spacing: -0.01em">Sailing Log</h2>
           <p style="margin: 0; font-size: 15px; color: #6B7280">Trips recorded from the boat log. Open the logbook for the exact GPS track.</p>
         </div>
         <div role="group" aria-label="Season" style="display: flex; gap: 4px; padding: 4px; background: #F1F3F7; border-radius: 10px">
@@ -116,20 +117,25 @@ a{color:inherit}
 
   <section class="boat-status" aria-labelledby="boat-status-title">
     <div class="boat-status-inner">
-      <div class="boat-status-head"><div><h2 id="boat-status-title">Boat Status</h2><p>Cabin conditions and movement sensor activity over time.</p></div></div>
+      <div class="boat-status-head"><div><h2 id="boat-status-title">Boat Status</h2><p>Cabin conditions and movement sensor activity over time.</p></div>
+        <div id="chart-range" class="chart-range" role="group" aria-label="Chart date range">
+          <button type="button" data-days="1" aria-pressed="true">Today</button>
+          <button type="button" data-days="7" aria-pressed="false">Last Week</button>
+          <button type="button" data-days="30" aria-pressed="false">Last Month</button>
+        </div>
+      </div>
       <div class="boat-status-grid">
         <article class="boat-status-card" id="cabin-chart" style="scroll-margin-top:24px">
           <h3>Temperature and humidity</h3>
           <p id="sensor-chart-summary">Live sensor readings · collected every five minutes</p>
-          <div class="sensor-chart-frame"><svg id="sensor-chart" class="boat-chart" viewBox="0 0 640 260" role="img" tabindex="0" aria-describedby="sensor-chart-help" aria-label="Waiting for cabin temperature and humidity readings"></svg><div class="sensor-tooltip" id="sensor-tooltip" role="status" hidden></div></div><p id="sensor-chart-help" class="chart-help">Hover or tap to see readings. Use arrow keys when the chart is focused.</p>
+          <div class="sensor-chart-frame"><svg id="sensor-chart" class="boat-chart" viewBox="0 0 640 260" role="img" tabindex="0" aria-label="Waiting for cabin temperature and humidity readings"></svg><div class="sensor-tooltip" id="sensor-tooltip" role="status" hidden></div></div>
           <div class="boat-status-legend"><span><i class="legend-dot"></i>Temperature · °C</span><span><i class="legend-dot humidity"></i>Humidity · %</span></div>
         </article>
         <article class="boat-status-card movement-card" id="motion" style="scroll-margin-top:24px">
           <h3>Movement sensor</h3>
           <p id="motion-status" role="status">Connecting to the Pi…</p>
-          <span class="alarm-live" id="motion-live" data-online="false">Connecting</span>
           <div class="movement-chart-area">
-            <div class="sensor-chart-frame"><svg id="motion-chart" viewBox="0 0 640 108" role="img" tabindex="0" aria-label="Recorded motion during the last 24 hours; hover over activity for exact times"></svg><div id="motion-tooltip" class="sensor-tooltip" role="status" hidden></div></div>
+            <div class="sensor-chart-frame"><svg id="motion-chart" viewBox="0 0 640 108" role="img" tabindex="0" aria-label="Recorded motion and alarm activity"></svg><div id="motion-tooltip" class="sensor-tooltip" role="status" hidden></div></div>
             <div class="boat-status-legend"><span><i class="legend-dot" style="background:#32834d"></i>Movement</span><span><i class="legend-dot" style="background:#c34f3f"></i>Buzzer alarm</span></div>
             <div id="movement-events" class="movement-events" aria-label="Recent motion and alarm events"></div>
           </div>
@@ -140,9 +146,9 @@ a{color:inherit}
 
   <section id="internet" class="internet-section" aria-labelledby="internet-title">
     <div class="internet-inner"><article class="internet-card">
-      <div class="internet-heading"><h2 id="internet-title">Internet connection</h2><span id="internet-current" class="alarm-live" data-online="false" role="status">Waiting for Pi contact</span></div>
+      <div class="internet-heading"><h2 id="internet-title">Internet connection</h2></div>
       <p id="internet-summary" role="status"></p>
-      <svg id="internet-chart" viewBox="0 0 1200 108" role="img" aria-label="Pi internet contact during the last 24 hours"></svg>
+      <svg id="internet-chart" viewBox="0 0 1200 108" role="img" aria-label="Recorded Pi internet contact"></svg>
       <div class="boat-status-legend"><span><i class="legend-dot" style="background:#32834d"></i>Contact confirmed</span><span><i class="legend-dot" style="background:#c34f3f"></i>No contact</span><span><i class="legend-dot" style="background:#dce3df"></i>No data</span></div>
     </article></div>
   </section>
@@ -151,11 +157,12 @@ a{color:inherit}
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="assets/sailing-stats.js"></script>
+<script src="assets/chart-range.js?v=20261116-history"></script>
 <script>
 (()=>{
   const API="https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com";
   const sensorSvg=document.getElementById('sensor-chart');
-  let latestSensorAt=null,sensorFeedFailed=false;
+  let latestSensorAt=null,sensorFeedFailed=false,cabinSamples=[];
   function sensorHealth(){
     const summary=document.getElementById('sensor-chart-summary');
     const stale=!latestSensorAt||Date.now()-Date.parse(latestSensorAt)>600000;
@@ -170,16 +177,17 @@ a{color:inherit}
     sensorSvg.replaceChildren();
     document.getElementById('sensor-tooltip').hidden=true;
     sensorSvg.onpointermove=sensorSvg.onpointerdown=sensorSvg.onpointerleave=sensorSvg.onfocus=sensorSvg.onblur=sensorSvg.onkeydown=null;
-    sensorSvg.setAttribute('aria-label',`Cabin temperature and humidity from the latest ${samples.length?'24 hours':'sensor readings'}`);
-    const now=Date.now(),recent=samples.filter(sample=>{const time=Date.parse(sample.observedAt);return Number.isFinite(time)&&time>=now-24*60*60*1000&&time<=now+60*1000;}).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
-    if(!recent.length){sensorSvg.append(svgNode('text',{x:320,y:125,'text-anchor':'middle',class:'chart-empty'},'No sensor readings received yet'));return;}
+    const {start,end,days}=KiseroChartRange.window();
+    sensorSvg.setAttribute('aria-label','Recorded cabin temperature and humidity');
+    const recent=samples.filter(sample=>{const time=Date.parse(sample.observedAt);return time>=start&&time<=end;}).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+    if(!recent.length){document.getElementById('sensor-chart-summary').textContent='No readings in this period';sensorSvg.append(svgNode('text',{x:320,y:125,'text-anchor':'middle',class:'chart-empty'},'No sensor readings received yet'));return;}
     const left=56,right=584,top=30,bottom=186,width=right-left,height=bottom-top;
     const temperatures=recent.map(sample=>Number(sample.temperatureC)),humidities=recent.map(sample=>Number(sample.humidityPct));
     let tMin=Math.floor((Math.min(...temperatures)-1)/2)*2,tMax=Math.ceil((Math.max(...temperatures)+1)/2)*2;
     if(tMax<=tMin)tMax=tMin+2;
     let hMin=Math.max(0,Math.floor((Math.min(...humidities)-5)/5)*5),hMax=Math.min(100,Math.ceil((Math.max(...humidities)+5)/5)*5);
     if(hMax<=hMin){hMin=Math.max(0,hMin-5);hMax=Math.min(100,hMax+5);}
-    const first=Date.parse(recent[0].observedAt),last=Date.parse(recent[recent.length-1].observedAt),span=Math.max(1,last-first);
+    const first=start,span=Math.max(1,end-start);
     const xFor=sample=>left+(Date.parse(sample.observedAt)-first)/span*width;
     const yFor=(value,min,max)=>bottom-(value-min)/(max-min)*height;
     for(let i=0;i<5;i++){
@@ -188,10 +196,18 @@ a{color:inherit}
       sensorSvg.append(svgNode('text',{x:10,y:y+4},`${tickT.toFixed(1)}°C`));
       sensorSvg.append(svgNode('text',{x:592,y:y+4},`${tickH.toFixed(0)}%`));
     }
-    const tempLine=svgNode('polyline',{class:'temp-line',points:recent.map(sample=>`${xFor(sample)},${yFor(Number(sample.temperatureC),tMin,tMax)}`).join(' ')});
-    const humidityLine=svgNode('polyline',{class:'humidity-line',points:recent.map(sample=>`${xFor(sample)},${yFor(Number(sample.humidityPct),hMin,hMax)}`).join(' ')});
-    sensorSvg.append(tempLine,humidityLine);
-    for(const sample of recent){
+    const tracks=[['temperatureC','temp-line',tMin,tMax],['humidityPct','humidity-line',hMin,hMax]];
+    for(const [key,style,min,max] of tracks){
+      let path='',previous=0;
+      for(const sample of recent){
+        const time=Date.parse(sample.observedAt),command=time-previous>15*60000?'M':'L';
+        path+=`${command}${xFor(sample)},${yFor(Number(sample[key]),min,max)} `;
+        previous=time;
+      }
+      sensorSvg.append(svgNode('path',{class:style,d:path}));
+    }
+    const dots=recent.length>700?recent.filter((_,i)=>i===recent.length-1||i%Math.ceil(recent.length/700)===0):recent;
+    for(const sample of dots){
       const time=sensorTime(sample.observedAt),temperature=Number(sample.temperatureC),humidity=Number(sample.humidityPct);
       const tempDot=svgNode('circle',{class:'temp-dot',cx:xFor(sample),cy:yFor(temperature,tMin,tMax),r:recent.length>80?2.2:4});
       tempDot.append(svgNode('title',{},`${time} · ${temperature.toFixed(2)} °C`));
@@ -199,9 +215,10 @@ a{color:inherit}
       humidityDot.append(svgNode('title',{},`${time} · ${humidity.toFixed(1)}% humidity`));
       sensorSvg.append(tempDot,humidityDot);
     }
-    const shortTime=value=>new Date(value).toLocaleTimeString(window.KiseroI18n.locale,{hour:'2-digit',minute:'2-digit'});
-    sensorSvg.append(svgNode('text',{x:left,y:220},shortTime(recent[0].observedAt)),svgNode('text',{x:right,y:220,'text-anchor':'end'},shortTime(recent[recent.length-1].observedAt)));
-    document.getElementById('sensor-chart-summary').textContent=`Recorded cabin readings · last 24 hours · ${recent.length} samples`;
+    for(let i=0;i<=4;i++){
+      sensorSvg.append(svgNode('text',{x:left+width*i/4,y:220,'text-anchor':i===0?'start':i===4?'end':'middle'},KiseroChartRange.tick(start+(end-start)*i/4)));
+    }
+    document.getElementById('sensor-chart-summary').textContent=`Recorded cabin readings · ${recent.length} samples`;
     let selected=recent.length-1;
     const tooltip=document.getElementById('sensor-tooltip'),frame=sensorSvg.parentElement;
     const hide=()=>{tooltip.hidden=true;sensorSvg.querySelector('.sensor-hover')?.remove();};
@@ -225,7 +242,8 @@ a{color:inherit}
       const response=await fetch(`${API}/v1/sensors`,{cache:'no-store'});
       if(!response.ok)throw new Error(`Sensor feed returned ${response.status}`);
       const payload=await response.json(),samples=Array.isArray(payload.samples)?payload.samples.filter(sample=>Number.isFinite(Number(sample.temperatureC))&&Number.isFinite(Number(sample.humidityPct))):[];
-      drawSensorChart(samples);
+      cabinSamples=samples;
+      drawSensorChart(cabinSamples);
       if(!samples.length){
         document.getElementById('cabin-temperature').textContent='— °C';document.getElementById('cabin-humidity').textContent='— %';
 
@@ -239,6 +257,7 @@ a{color:inherit}
       sensorFeedFailed=true;sensorHealth();
     }
   }
+  window.addEventListener('kisero-chart-range',()=>{drawSensorChart(cabinSamples);sensorHealth();});
   refreshSensorReadings();setInterval(refreshSensorReadings,300000);
   const rows=document.getElementById('trip-rows');
   const status=document.getElementById('latest-status');
@@ -333,7 +352,7 @@ a{color:inherit}
   const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Last recorded GPS position').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
 </script>
-<script src="assets/connectivity.js?v=20261029-motion-tooltip" defer></script>
-<script src="assets/alarm.js?v=20261116-boat" defer></script>
+<script src="assets/connectivity.js?v=20261116-history" defer></script>
+<script src="assets/alarm.js?v=20261116-history" defer></script>
 </body>
 </html>

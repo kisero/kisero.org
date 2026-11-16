@@ -1,5 +1,16 @@
 /* English source, Spanish, Croatian, Slovak. Parameters use {0}, {1}. */
 window.KiseroMessages=[
+ ["Today", "Hoy", "Danas", "Dnes"],
+ ["Last Week", "Última semana", "Zadnjih 7 dana", "Posledný týždeň"],
+ ["Last Month", "Último mes", "Zadnjih 30 dana", "Posledný mesiac"],
+ ["Chart date range", "Periodo de los gráficos", "Razdoblje grafikona", "Obdobie grafov"],
+ ["No readings in this period", "Sin lecturas en este periodo", "Nema očitanja u ovom razdoblju", "V tomto období nie sú žiadne merania"],
+ ["Recorded cabin readings · {0} samples", "Lecturas de la cabina · {0} mediciones", "Očitanja u kabini · {0} uzoraka", "Merania v kajute · {0} vzoriek"],
+ ["Recorded cabin temperature and humidity", "Temperatura y humedad registradas en la cabina", "Zabilježena temperatura i vlažnost u kabini", "Zaznamenaná teplota a vlhkosť v kajute"],
+ ["Recorded motion and alarm activity", "Actividad del sensor y de la alarma", "Zabilježeni pokreti i aktivnost alarma", "Zaznamenaný pohyb a aktivita alarmu"],
+ ["Recorded Pi internet contact", "Conexión a internet de la Pi registrada", "Zabilježena internetska veza Pi-ja", "Zaznamenané internetové spojenie Pi"],
+ ["Chart history unavailable", "Historial no disponible", "Povijest grafikona nije dostupna", "História grafu je nedostupná"],
+
  ["Open last recorded GPS position", "Abrir la última posición GPS registrada", "Otvori zadnji zabilježeni GPS položaj", "Otvoriť poslednú zaznamenanú polohu GPS"],
  ["At sea", "En el mar", "Na moru", "Na mori"],
  ["Location unknown", "Ubicación desconocida", "Nepoznata lokacija", "Neznáma poloha"],
@@ -44,7 +55,7 @@ window.KiseroMessages=[
   "Systém Raspberry Pi"
  ],
  [
-  "Sailing log",
+  "Sailing Log",
   "Registro de navegación",
   "Dnevnik plovidbe",
   "Lodný denník"

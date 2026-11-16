@@ -12,6 +12,7 @@ function enableControls(){
   button.disabled=saving||!privateLink||(button.dataset.mode==='auto'&&!automaticAvailable);
  });
 }
+let historicalEvents=[],historyRequest=null;
 let model=null,events=[],socket=null,reconnect=null,lastPacket=0,closed=false,motionSelection=null;
 const format=t=>new Date(t).toLocaleString(window.KiseroI18n.locale, {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -38,14 +39,10 @@ function render(){
   $('motion-status').textContent=!fresh?(d?`No readings since ${format(d.reportedAt)}`:'Waiting for first Pi contact.'):detail;
   $('motion-status').classList.toggle('data-warning',!fresh);
  }
- if($('motion-live')){
-  $('motion-live').textContent=fresh?(socket?.readyState===1?'Live updates':'Reconnecting live feed'):'Pi offline';
-  $('motion-live').dataset.online=String(!!fresh&&socket?.readyState===1);
- }
  draw();
  if($('movement-events')){
   const labels={motion:'Movement detected',armed:'Alarm turned on · exit delay',disarmed:'Alarm turned off',triggered:'Buzzer alarm triggered',silenced:'Buzzer stopped',ready:'Motion sensor ready'};
-  $('movement-events').innerHTML=events.filter(e=>e.armed===true&&['motion','triggered','silenced'].includes(e.kind)).reverse().slice(0,3).map(e=>`<div class="movement-event" data-kind="${esc(e.kind)}"><time datetime="${esc(e.observedAt)}">${esc(format(e.observedAt))}</time><strong>${esc(e.kind==='motion'&&!e.motion?'Movement cleared':labels[e.kind]||e.kind)}</strong></div>`).join('')||'<p class="movement-empty">No alarm activity while armed in the last 24 hours.</p>';
+  $('movement-events').innerHTML=chartEvents().filter(e=>e.armed===true&&['motion','triggered','silenced'].includes(e.kind)).reverse().slice(0,3).map(e=>`<div class="movement-event" data-kind="${esc(e.kind)}"><time datetime="${esc(e.observedAt)}">${esc(format(e.observedAt))}</time><strong>${esc(e.kind==='motion'&&!e.motion?'Movement cleared':labels[e.kind]||e.kind)}</strong></div>`).join('');
  }
  if(admin){
   $('alarm-current').textContent=`Alarm (${state}) · ${detail}`;
@@ -55,13 +52,41 @@ function render(){
   enableControls();
  }
 }
+function chartEvents(){
+ const {start,end,days}=KiseroChartRange.window();
+ const rows=days===1?events:[...new Map([...historicalEvents,...events].map(row=>[row.id,row])).values()];
+ return rows.filter(row=>{const time=Date.parse(row.observedAt);return time>=start&&time<=end;})
+  .sort((a,b)=>a.observedAt.localeCompare(b.observedAt));
+}
+window.addEventListener('kisero-chart-range',async()=>{
+ const {days}=KiseroChartRange.window();
+ historyRequest?.abort();
+ historicalEvents=[];
+ window.dispatchEvent(new CustomEvent('kisero-chart-history',{detail:null}));
+ if(model)render();else draw();
+ if(days===1)return;
+ const request=new AbortController();
+ historyRequest=request;
+ try{
+  const response=await fetch(API+'/v1/alarm?days='+days,{signal:request.signal});
+  if(!response.ok)throw new Error();
+  const history=await response.json();
+  if(request.signal.aborted||!Array.isArray(history.events))return;
+  historicalEvents=history.events;
+  if(history.connectivity)window.dispatchEvent(new CustomEvent('kisero-chart-history',{detail:history.connectivity}));
+  if(model)render();else draw();
+ }catch(error){
+  if(!request.signal.aborted)$('motion-status').textContent='Chart history unavailable';
+ }
+});
 function draw(){
  const svg=$('motion-chart');if(!svg)return;
- const end=Date.now(),start=end-86400000,x=t=>40+Math.max(0,Math.min(1,(t-start)/86400000))*560;
+ const {start,end}=KiseroChartRange.window(),span=Math.max(1,end-start);
+ const rows=chartEvents(),x=t=>40+Math.max(0,Math.min(1,(t-start)/span))*560;
  let active=null,segments=[];
  // Each device event records its confirmed armed state. Disarmed events close
  // activity, even if the PIR is still high; they never start a colored segment.
- for(const e of events){
+ for(const e of rows){
   const t=Date.parse(e.observedAt);
   if(e.armed!==true||e.kind==='disarmed'){
    if(active!==null){segments.push([active,t]);active=null;}
@@ -72,17 +97,17 @@ function draw(){
    else if(active!==null){segments.push([active,t]);active=null;}
   }
  }
- if(active!==null){const contact=Date.parse(model.device?.reportedAt);segments.push([active,Math.min(end,Number.isFinite(contact)?contact:end)]);}
+ if(active!==null){const contact=Date.parse(model?.device?.reportedAt);segments.push([active,Math.min(end,Number.isFinite(contact)?contact:end)]);}
  let html='<rect x="40" y="24" width="560" height="42" rx="7" fill="#edf1ef"/>';
- for(let i=0;i<=4;i++){const t=start+i*21600000;html+=`<text x="${40+i*140}" y="91" text-anchor="${i===0?'start':i===4?'end':'middle'}">${esc(new Date(t).toLocaleTimeString(window.KiseroI18n.locale,{hour:'2-digit',minute:'2-digit'}))}</text>`;}
+ for(let i=0;i<=4;i++){const t=start+i*span/4;html+=`<text x="${40+i*140}" y="91" text-anchor="${i===0?'start':i===4?'end':'middle'}">${esc(KiseroChartRange.tick(t))}</text>`;}
  for(const [a,b]of segments){if(b>=a)html+=`<rect class="activity" data-start="${a}" data-end="${b}" x="${x(a)}" y="24" width="${Math.max(3,x(b)-x(a))}" height="42" rx="3"><title>Movement: ${esc(format(a))} – ${esc(format(b))}</title></rect>`;}
- for(const e of events.filter(e=>e.kind==='triggered'&&e.armed===true))html+=`<rect class="alert" data-time="${Date.parse(e.observedAt)}" x="${x(Date.parse(e.observedAt))}" y="18" width="4" height="54"><title>Buzzer triggered: ${esc(format(e.observedAt))}</title></rect>`;
+ for(const e of rows.filter(e=>e.kind==='triggered'&&e.armed===true))html+=`<rect class="alert" data-time="${Date.parse(e.observedAt)}" x="${x(Date.parse(e.observedAt))}" y="18" width="4" height="54"><title>Buzzer triggered: ${esc(format(e.observedAt))}</title></rect>`;
  svg.innerHTML=html;
  const tooltip=$('motion-tooltip');if(!tooltip)return;
  const hide=()=>{motionSelection=null;tooltip.hidden=true;svg.querySelector('.motion-hover')?.remove();};
  const show=(time,hit=null)=>{
   time=Math.max(start,Math.min(end,time));
-  const alert=hit?.classList.contains('alert')?Number(hit.dataset.time):events.some(e=>e.kind==='triggered'&&e.armed===true&&Date.parse(e.observedAt)===time)?time:null;
+  const alert=hit?.classList.contains('alert')?Number(hit.dataset.time):rows.some(e=>e.kind==='triggered'&&e.armed===true&&Date.parse(e.observedAt)===time)?time:null;
   const segment=hit?.classList.contains('activity')?[Number(hit.dataset.start),Number(hit.dataset.end)]:segments.find(([a,b])=>time>=a&&time<=b);
   if(alert!==null)time=alert;else if(segment)time=Math.max(segment[0],Math.min(segment[1],time));
   motionSelection=time;
@@ -99,13 +124,13 @@ function draw(){
   for(const [key,value]of Object.entries({class:'motion-hover',x1:x(alert??time),x2:x(alert??time),y1:16,y2:76,stroke:'#53615b','stroke-dasharray':'4 4','pointer-events':'none'}))guide.setAttribute(key,value);
   svg.append(guide);
  };
- const point=event=>{const box=svg.getBoundingClientRect(),time=start+Math.max(0,Math.min(1,((event.clientX-box.left)/box.width*640-40)/560))*86400000;show(time,event.target.closest?.('rect'));};
+ const point=event=>{const box=svg.getBoundingClientRect(),time=start+Math.max(0,Math.min(1,((event.clientX-box.left)/box.width*640-40)/560))*span;show(time,event.target.closest?.('rect'));};
  svg.onpointermove=point;svg.onpointerdown=point;svg.onpointerleave=hide;
  svg.onfocus=()=>show(motionSelection??end);svg.onblur=hide;
- svg.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End','Escape'].includes(event.key)){event.preventDefault();if(event.key==='Escape')hide();else show(event.key==='Home'?start:event.key==='End'?end:(motionSelection??end)+(event.key==='ArrowLeft'?-300000:300000));}};
+ svg.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End','Escape'].includes(event.key)){event.preventDefault();if(event.key==='Escape')hide();else show(event.key==='Home'?start:event.key==='End'?end:(motionSelection??end)+(event.key==='ArrowLeft'?-1:1)*Math.max(300000,span/144));}};
  if(motionSelection!==null)show(motionSelection);
 }
-async function snapshot(){try{const r=await fetch(API+'/v1/alarm',{cache:'no-store'});if(!r.ok)throw Error();const p=await r.json();merge(p);connect(p.websocketUrl);}catch(e){if($('motion-live')){$('motion-live').textContent='Feed unavailable';$('motion-live').dataset.online='false';}if($('alarm-message'))$('alarm-message').textContent='Cannot reach the alarm service. Try again shortly.';}}
+async function snapshot(){try{const r=await fetch(API+'/v1/alarm',{cache:'no-store'});if(!r.ok)throw Error();const p=await r.json();merge(p);connect(p.websocketUrl);}catch(e){if($('motion-status'))$('motion-status').textContent='Feed unavailable';if($('alarm-message'))$('alarm-message').textContent='Cannot reach the alarm service. Try again shortly.';}}
 function connect(url){
  if(!url||closed||socket?.readyState===0||socket?.readyState===1)return;
  socket=new WebSocket(url);
