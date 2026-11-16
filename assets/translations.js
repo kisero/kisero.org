@@ -1,5 +1,22 @@
 /* English source, Spanish, Croatian, Slovak. Parameters use {0}, {1}. */
 window.KiseroMessages=[
+ ["Open last recorded GPS position", "Abrir la última posición GPS registrada", "Otvori zadnji zabilježeni GPS položaj", "Otvoriť poslednú zaznamenanú polohu GPS"],
+ ["At sea", "En el mar", "Na moru", "Na mori"],
+ ["Location unknown", "Ubicación desconocida", "Nepoznata lokacija", "Neznáma poloha"],
+ ["Manual On", "Activar manualmente", "Ručno uključi", "Zapnúť ručne"],
+ ["Manual Off", "Desactivar manualmente", "Ručno isključi", "Vypnúť ručne"],
+ ["Auto", "Automático", "Automatski", "Automaticky"],
+ ["Mode · Manual", "Modo · Manual", "Način · Ručno", "Režim · Ručný"],
+ ["Auto · {0}", "Automático · {0}", "Automatski · {0}", "Automaticky · {0}"],
+ ["Waiting for boat GPS", "Esperando el GPS del barco", "Čeka se GPS broda", "Čaká sa na GPS lode"],
+ ["Waiting for a fresh, accurate OwnTracks location", "Esperando una ubicación reciente y precisa de OwnTracks", "Čeka se svježa i precizna lokacija iz OwnTracksa", "Čaká sa na aktuálnu a presnú polohu z OwnTracks"],
+ ["Boat underway", "Barco en navegación", "Brod plovi", "Loď sa plaví"],
+ ["Phone away from the boat", "Teléfono lejos del barco", "Telefon je daleko od broda", "Telefón je ďaleko od lode"],
+ ["Phone near the boat", "Teléfono cerca del barco", "Telefon je blizu broda", "Telefón je blízko lode"],
+ ["Location uncertainty overlaps the 300 m boundary", "La incertidumbre de la ubicación alcanza el límite de 300 m", "Nesigurnost lokacije prelazi granicu od 300 m", "Neistota polohy zasahuje hranicu 300 m"],
+ ["Waiting for location", "Esperando la ubicación", "Čeka se lokacija", "Čaká sa na polohu"],
+ ["Auto uses fresh boat GPS and OwnTracks readings to arm when you’re more than 300 m away and disarm when you return. It disarms while sailing. Manual On and Manual Off stay in effect until you select Auto.", "El modo automático usa datos recientes del GPS del barco y de OwnTracks para activar la alarma cuando te alejas más de 300 m y desactivarla al volver. La desactiva durante la navegación. Los ajustes manuales siguen activos hasta que selecciones el modo automático.", "Automatski način koristi svježe podatke GPS-a broda i OwnTracksa za uključivanje alarma kad se udaljiš više od 300 m i isključivanje kad se vratiš. Tijekom plovidbe alarm se isključuje. Ručne postavke vrijede dok ne odabereš automatski način.", "Automatický režim používa aktuálne údaje GPS lode a OwnTracks. Alarm zapne, keď sa vzdiališ viac ako 300 m, a vypne po návrate. Počas plavby je alarm vypnutý. Ručné nastavenia platia, kým nezvolíš automatický režim."],
+
  ["Last checked 4G public IP:","Última IP pública 4G comprobada:","Zadnja provjerena javna 4G IP adresa:","Naposledy overená verejná IP adresa 4G:"],
  ["14 November 2026 · SSH did not respond at this address.","14 de noviembre de 2026 · SSH no respondió en esta dirección.","14. studenoga 2026. · SSH nije odgovorio na ovoj adresi.","14. novembra 2026 · SSH na tejto adrese neodpovedalo."],["No recorded alarm activity","Sin actividad de alarma registrada","Nema zabilježene aktivnosti alarma","Žiadna zaznamenaná aktivita alarmu"],["No readings since {0}", "Sin lecturas desde {0}", "Nema očitanja od {0}", "Žiadne merania od {0}"], ["No position readings since {0}", "Sin lecturas de posición desde {0}", "Nema očitanja položaja od {0}", "Žiadne údaje o polohe od {0}"], ["Boat connected · Last update {0}", "Barco conectado · Última actualización {0}", "Brod povezan · Zadnje ažuriranje {0}", "Loď pripojená · Posledná aktualizácia {0}"], ["Boat connection unavailable · Last update {0}", "Conexión del barco no disponible · Última actualización {0}", "Veza s brodom nije dostupna · Zadnje ažuriranje {0}", "Spojenie s loďou nedostupné · Posledná aktualizácia {0}"], ["No live position readings · using configured berth", "Sin lecturas de posición en directo · usando el amarre configurado", "Nema očitanja položaja uživo · koristi se postavljeni vez", "Žiadne aktuálne údaje o polohe · používa sa nastavené kotvisko"], ["Boat position unavailable", "Posición del barco no disponible", "Položaj broda nije dostupan", "Poloha lode je nedostupná"],
  [

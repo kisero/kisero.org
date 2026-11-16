@@ -22,7 +22,7 @@ a{color:inherit}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
 <link rel="stylesheet" href="assets/site-ui.css?v=20261029-motion-tooltip">
-<script src="assets/translations.js?v=20261029-motion-tooltip"></script>
+<script src="assets/translations.js?v=20261116-boat"></script>
 <script src="assets/i18n.js?v=20261029-motion-tooltip"></script>
 </head>
 <body>
@@ -36,7 +36,7 @@ a{color:inherit}
         <div class="hero-status-row">
           <div class="status-pills">
             <a class="cabin-pill" href="#cabin-chart" title="Temperature and humidity"><strong><span id="cabin-temperature">— °C</span> - <span id="cabin-humidity">— %</span></strong></a>
-            <button id="locate-open" class="boat-location-pill" type="button" title="Configured berth; live GPS is not connected."><span class="boat-status-dot" aria-hidden="true"></span><span id="latest-status">Moored (Puerto Banús)</span></button>
+            <button id="locate-open" class="boat-location-pill" type="button" title="Open last recorded GPS position"><span class="boat-status-dot" aria-hidden="true"></span><span id="latest-status">Boat position unavailable</span></button>
             <a id="alarm-badge" class="alarm-pill" href="#motion" data-state="off"><span class="alarm-dot"></span><span id="alarm-label">Alarm (…)</span></a>
           </div>
           <a id="cabin-sensor-status" class="sensor-report-link" href="#internet">Waiting for Pi contact</a>
@@ -242,10 +242,24 @@ a{color:inherit}
   refreshSensorReadings();setInterval(refreshSensorReadings,300000);
   const rows=document.getElementById('trip-rows');
   const status=document.getElementById('latest-status');
-  fetch('assets/boat-status.json').then(response=>{if(!response.ok)throw new Error();return response.json();}).then(boat=>{
-    if(!['moored','sailing'].includes(boat.state)||typeof boat.location!=='string')return;
-    status.textContent=`${boat.state==='sailing'?'Sailing':'Moored'} (${boat.location})`;
-  }).catch(()=>{});
+  async function refreshBoatPosition(){
+    if(document.hidden)return;
+    let label='Boat position unavailable';
+    try{
+      const response=await fetch(`${API}/v1/alarm/boat`,{cache:'no-store'});
+      if(!response.ok)throw new Error();
+      const boat=await response.json();
+      if(boat.state==='sailing')label=`Sailing (${boat.location||'At sea'})`;
+      if(boat.state==='moored')label=`Moored (${boat.location||'Location unknown'})`;
+    }catch{}
+    if(status.dataset.source!==label){
+      status.dataset.source=label;
+      status.textContent=label;
+    }
+  }
+  refreshBoatPosition();
+  setInterval(refreshBoatPosition,30000);
+  document.addEventListener('visibilitychange',refreshBoatPosition);
   let boatPosition=null, map=null, boatMarker=null;
   const fmtDate=value=>{const [day,time=""]=value.split('T');return new Date(`${day}T00:00:00Z`).toLocaleDateString(window.KiseroI18n.locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})+(time?` · ${time.slice(0,5)}`:'')};
   const duration=(start,end)=>{const a=new Date(`${start}Z`),b=new Date(`${end}Z`),mins=Math.max(0,Math.round((b-a)/60000));return `${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`};
@@ -306,19 +320,20 @@ a{color:inherit}
       const speed=cell(`${Number(trip.averageSogKn).toFixed(1)} / ${sustained?sustained.kn.toFixed(1):'—'} / ${Number(trip.maxSogKn).toFixed(1)} kn`,'text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap');
       speed.title=sustained?`Sustained: highest average of 3 consecutive 15-second SOG readings · ${sustained.start.slice(11,19)}–${sustained.end.slice(11,19)} (log time)`:'Sustained speed unavailable: no complete sequence of 3 consecutive 15-second readings';
       tr.append(speed);
-      const stats=windStats(trip.id===sensorData.tripId?sensorData.readings:{});
+      const readings=detailsById.get(trip.id)?.readings||(trip.id===sensorData.tripId?sensorData.readings:{});
+      const stats=windStats(readings);
       tr.append(cell(stats.speed,'text-align:right;font-variant-numeric:tabular-nums'));
       const wind=cell('','');
-      if(stats.bearing!==null){const badge=document.createElement('span');const degrees=Math.round(stats.bearing);badge.textContent=`${windName(stats.bearing)} · ${degrees}°`;badge.title=`Circular mean of ${Object.values(sensorData.readings||{}).filter(row=>Number.isFinite(Number(row.TWD))).length} recorded true-wind direction readings`;badge.style.cssText='display:inline-block;padding:3px 10px;border-radius:999px;background:#E8F2EE;color:#205F4D;font-size:13px;white-space:nowrap';wind.append(badge);}else{wind.textContent='—';wind.style.color='#6B7280';}
+      if(stats.bearing!==null){const badge=document.createElement('span');const degrees=Math.round(stats.bearing);badge.textContent=`${windName(stats.bearing)} · ${degrees}°`;badge.title=`Circular mean of ${Object.values(readings||{}).filter(row=>Number.isFinite(Number(row.TWD))).length} recorded true-wind direction readings`;badge.style.cssText='display:inline-block;padding:3px 10px;border-radius:999px;background:#E8F2EE;color:#205F4D;font-size:13px;white-space:nowrap';wind.append(badge);}else{wind.textContent='—';wind.style.color='#6B7280';}
       tr.append(wind);
       rows.append(tr);
     }
-    const latestTrack=detailsById.get(latest.id)?.track,point=latestTrack?.at(-1);if(point){const lat=Number(point[1]),lon=Number(point[0]);boatPosition=[lat,lon];document.getElementById('boat-coordinates').textContent=`${Math.abs(lat).toFixed(4)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(4)}° ${lon>=0?'E':'W'}`;document.querySelector('.locate-sample').textContent='Last recorded GPS position; live GPS is not connected.';document.getElementById('boat-speed').textContent=`${Number(point[3]).toFixed(1)} kn`;if(map&&boatMarker){boatMarker.setLatLng(boatPosition);map.setView(boatPosition,13);}}
+    const latestTrack=detailsById.get(latest.id)?.track,point=latestTrack?.at(-1);if(point){const lat=Number(point[1]),lon=Number(point[0]);boatPosition=[lat,lon];document.getElementById('boat-coordinates').textContent=`${Math.abs(lat).toFixed(4)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(4)}° ${lon>=0?'E':'W'}`;document.querySelector('.locate-sample').textContent='Last recorded GPS position';document.getElementById('boat-speed').textContent=`${Number(point[3]).toFixed(1)} kn`;if(map&&boatMarker){boatMarker.setLatLng(boatPosition);map.setView(boatPosition,13);}}
   }).catch(error=>{rows.innerHTML='<tr><td colspan="7" style="padding:16px;color:#8A5300">Trip summaries could not be loaded. Try the sailing log again shortly.</td></tr>';});
   const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Last recorded GPS position').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
 </script>
 <script src="assets/connectivity.js?v=20261029-motion-tooltip" defer></script>
-<script src="assets/alarm.js?v=20261029-motion-tooltip" defer></script>
+<script src="assets/alarm.js?v=20261116-boat" defer></script>
 </body>
 </html>

@@ -5,6 +5,13 @@ const API='https://6zdivjvubh.execute-api.eu-north-1.amazonaws.com';
 const $=id=>document.getElementById(id);
 const admin=!!$('alarm-controls');
 const capability=admin?location.hash.slice(1):'';
+const privateLink=/^[a-f0-9]{64}$/.test(capability);
+let saving=false, automaticAvailable=false, privateRequest=0;
+function enableControls(){
+ document.querySelectorAll('#alarm-controls button').forEach(button=>{
+  button.disabled=saving||!privateLink||(button.dataset.mode==='auto'&&!automaticAvailable);
+ });
+}
 let model=null,events=[],socket=null,reconnect=null,lastPacket=0,closed=false,motionSelection=null;
 const format=t=>new Date(t).toLocaleString(window.KiseroI18n.locale, {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -45,7 +52,7 @@ function render(){
   $('alarm-contact').textContent=d?`Last Pi contact: ${format(d.reportedAt)}`:'Waiting for first Pi contact.';
   $('alarm-requested').textContent=pending?`Requested: ${c.armed?'On':'Off'} — waiting for Pi confirmation.`:'';
   if(!pending&&[$('alarm-message').textContent].some(value=>value==='Change saved. Waiting for the Pi to confirm.'||value===window.KiseroI18n.t('Change saved. Waiting for the Pi to confirm.')))$('alarm-message').textContent='Confirmed by the Pi.';
-  document.querySelectorAll('#alarm-controls button').forEach(b=>b.disabled=!/^[a-f0-9]{64}$/.test(capability));
+  enableControls();
  }
 }
 function draw(){
@@ -108,11 +115,52 @@ function connect(url){
  socket.onclose=()=>{render();clearTimeout(reconnect);reconnect=setTimeout(()=>snapshot(),4000);};
 }
 if(admin){
- if(!/^[a-f0-9]{64}$/.test(capability))$('alarm-message').textContent='Open your private control link to turn the alarm on or off.';
+ const reasons={
+  'boat-gps-unavailable':'Waiting for boat GPS',
+  'phone-location-unavailable':'Waiting for a fresh, accurate OwnTracks location',
+  underway:'Boat underway',away:'Phone away from the boat',near:'Phone near the boat',
+  'near-boundary':'Location uncertainty overlaps the 300 m boundary'
+ };
+ const headers={Authorization:'Bearer '+capability};
+ const refreshControl=async()=>{
+  if(!privateLink)return;
+  const request=++privateRequest;
+  const line=$('alarm-mode');
+  try{
+   const response=await fetch(API+'/v1/alarm/control',{headers,cache:'no-store'});
+   if(!response.ok)throw new Error();
+   const control=await response.json();
+   if(request!==privateRequest)return;
+   automaticAvailable=true;
+   const automatic=control.mode==='auto';
+   const label=automatic?`Auto · ${reasons[control.reason]||'Waiting for location'}`:'Mode · Manual';
+   line.hidden=false;
+   if(line.dataset.source!==label){line.dataset.source=label;line.textContent=label;}
+   $('alarm-controls').querySelector('[data-mode]').setAttribute('aria-pressed',String(automatic));
+  }catch{
+   if(request!==privateRequest)return;
+   automaticAvailable=false;
+   line.hidden=true;
+  }
+  enableControls();
+ };
+ if(!privateLink)$('alarm-message').textContent='Open your private control link to turn the alarm on or off.';
+ refreshControl();
+ setInterval(()=>{if(!document.hidden&&!saving)refreshControl();},15000);
  document.querySelectorAll('#alarm-controls button').forEach(button=>button.addEventListener('click',async()=>{
-  document.querySelectorAll('#alarm-controls button').forEach(b=>b.disabled=true);
+  saving=true;
+  enableControls();
   $('alarm-message').textContent='Sending change…';
-  try{const r=await fetch(API+'/v1/alarm/control',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+capability},body:JSON.stringify({armed:button.dataset.armed==='true'})});if(!r.ok)throw Error(r.status===401?'This private control link is invalid.':'Could not save the change.');merge(await r.json());$('alarm-message').textContent='Change saved. Waiting for the Pi to confirm.';}catch(e){$('alarm-message').textContent=e.message;}finally{render();}
+  const body=button.dataset.mode==='auto'?{mode:'auto'}:{armed:button.dataset.armed==='true'};
+  try{
+   const response=await fetch(API+'/v1/alarm/control',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(body)});
+   if(!response.ok)throw Error(response.status===401?'This private control link is invalid.':'Could not save the change.');
+   const packet=await response.json();
+   $('alarm-message').textContent='Change saved. Waiting for the Pi to confirm.';
+   merge(packet);
+   await refreshControl();
+  }catch(error){$('alarm-message').textContent=error.message;}
+  finally{saving=false;enableControls();}
  }));
 }
 snapshot();

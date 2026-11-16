@@ -127,7 +127,7 @@
       const speedStat=document.getElementById('stat-sog');
       speedStat.innerHTML=`${Number(trip.averageSogKn).toFixed(1)} / ${sustained?sustained.kn.toFixed(1):'—'} / ${Number(trip.maxSogKn).toFixed(1)} <span class="unit">kn</span>`;
       speedStat.title=sustained?`Sustained: highest average of 3 consecutive 15-second SOG readings · ${sustained.start.slice(11,19)}–${sustained.end.slice(11,19)} (log time)`:'Sustained speed unavailable: no complete sequence of 3 consecutive 15-second readings';
-      let sensorReadings={};try{const windResponse=await fetch('/assets/sensor-readings.json');if(windResponse.ok){const windData=await windResponse.json();if(windData.tripId===trip.id)sensorReadings=windData.readings||{}}}catch{}
+      let sensorReadings=data.readings||{};if(!data.readings)try{const windResponse=await fetch('/assets/sensor-readings.json');if(windResponse.ok){const windData=await windResponse.json();if(windData.tripId===trip.id)sensorReadings=windData.readings||{}}}catch{}
       const points=(data.track||[]).map(row=>({lon:Number(row[0]),lat:Number(row[1]),time:row[2],SOG:Number(row[3]),...(sensorReadings[row[2]]||{})})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));
       if(!points.length)throw new Error('This session has no GPS points.');
       document.getElementById('quality-points').textContent=String(points.length);
