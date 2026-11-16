@@ -1,5 +1,8 @@
 /* English source, Spanish, Croatian, Slovak. Parameters use {0}, {1}. */
 window.KiseroMessages=[
+ ["Checking boat position…","Comprobando la posición del barco…","Provjera položaja broda…","Zisťuje sa poloha lode…"],
+ ["Awaiting GPS","Esperando el GPS","Čeka se GPS","Čaká sa na GPS"],
+ ["Last known · {0}","Último estado conocido · {0}","Zadnje poznato stanje · {0}","Posledný známy stav · {0}"],
  ["Distance from boat · about {0} m","Distancia al barco · unos {0} m","Udaljenost od broda · oko {0} m","Vzdialenosť od lode · približne {0} m"],
  ["Distance from boat unavailable · waiting for fresh GPS and OwnTracks readings","Distancia al barco no disponible · esperando datos recientes del GPS y OwnTracks","Udaljenost od broda nije dostupna · čekaju se svježi podaci GPS-a i OwnTracksa","Vzdialenosť od lode nie je dostupná · čaká sa na aktuálne údaje GPS a OwnTracks"],
  ["Today", "Hoy", "Danas", "Dnes"],
