@@ -127,7 +127,7 @@ if(admin){
   const request=++privateRequest;
   const line=$('alarm-mode');
   try{
-   const response=await fetch(API+'/v1/alarm/control',{headers,cache:'no-store'});
+   const response=await fetch(API+'/v1/alarm/control',{headers,cache:'no-store',signal:AbortSignal.timeout(8000)});
    if(!response.ok)throw new Error();
    const control=await response.json();
    if(request!==privateRequest)return;
@@ -158,7 +158,7 @@ if(admin){
    const packet=await response.json();
    $('alarm-message').textContent='Change saved. Waiting for the Pi to confirm.';
    merge(packet);
-   await refreshControl();
+   void refreshControl();
   }catch(error){$('alarm-message').textContent=error.message;}
   finally{saving=false;enableControls();}
  }));
