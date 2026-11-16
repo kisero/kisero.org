@@ -158,7 +158,7 @@ if(admin){
    const control=await response.json();
    if(request!==privateRequest)return;
    automaticAvailable=true;
-   if(distanceLine){
+   if(distanceLine&&Object.hasOwn(control,'distanceMeters')){
     const label=Number.isInteger(control.distanceMeters)
       ?`Distance from boat · about ${control.distanceMeters.toLocaleString(window.KiseroI18n.locale)} m`
       :'Distance from boat unavailable · waiting for fresh GPS and OwnTracks readings';
