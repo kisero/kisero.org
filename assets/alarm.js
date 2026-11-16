@@ -71,7 +71,8 @@ window.addEventListener('kisero-chart-range',async()=>{
   const response=await fetch(API+'/v1/alarm?days='+days,{signal:request.signal});
   if(!response.ok)throw new Error();
   const history=await response.json();
-  if(request.signal.aborted||!Array.isArray(history.events))return;
+  if(request.signal.aborted)return;
+  if(!Array.isArray(history.events)||!Array.isArray(history.connectivity?.intervals))throw new Error();
   historicalEvents=history.events;
   if(history.connectivity)window.dispatchEvent(new CustomEvent('kisero-chart-history',{detail:history.connectivity}));
   if(model)render();else draw();
