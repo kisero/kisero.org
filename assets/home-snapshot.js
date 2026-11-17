@@ -9,7 +9,7 @@
     catch { return null; }
   };
   let current = window.KiseroHomeSeed || null;
-  let pending = false;
+  let pending = false, firstRequestFinished = false;
 
   function merge(snapshot) {
     if (snapshot?.schemaVersion !== 1 || !Array.isArray(snapshot.trips)) return;
@@ -31,11 +31,19 @@
     pending = true;
     try {
       const response = await fetch(api, {signal: AbortSignal.timeout(8000)});
-      if (response.ok) merge(await response.json());
+      if (response.ok) {
+        const snapshot = await response.json();
+        firstRequestFinished = true;
+        merge(snapshot);
+      }
     } catch {
       // Keep the last good data visible during an interrupted request.
     } finally {
       pending = false;
+      if (!firstRequestFinished) {
+        firstRequestFinished = true;
+        if (current) listeners.forEach(render => render(current));
+      }
     }
   }
   function whenVisible(element, render) {
@@ -53,6 +61,7 @@
   merge(persisted());
   window.KiseroHome = {
     whenVisible,
+    checkingFirstSnapshot: () => !firstRequestFinished,
     subscribe(render) {
       listeners.add(render);
       if (current) render(current);

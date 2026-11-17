@@ -35,8 +35,14 @@
     for(let i=0;i<=4;i++){const t=start+i*span/4;add('text',{x:left+(right-left)*i/4,y:91,'text-anchor':i===0?'start':i===4?'end':'middle'},KiseroChartRange.tick(t));}
     const latest=Math.max(lastContact??0,beats.at(-1)??0);
     const last=latest||undefined,online=last!==undefined&&Date.now()-last<=60000;
+    const checking=window.KiseroHome?.checkingFirstSnapshot();
     const header=document.getElementById('cabin-sensor-status');
-    if(header){header.textContent=last===undefined?'Waiting for Pi contact':`${online?'Boat connected':'Boat offline'} · Last update ${format(last)}`;header.classList.toggle('connection-warning',!online);}
+    if(header){
+      header.textContent=last===undefined?'Waiting for Pi contact':checking&&!online
+        ?`Last confirmed contact ${format(last)}`
+        :`${online?'Boat connected':'Boat offline'} · Last update ${format(last)}`;
+      header.classList.toggle('connection-warning',!online&&!checking);
+    }
     const summary=document.getElementById('internet-summary');
     if(summary){summary.textContent=online?'':last===undefined?'Waiting for Pi contact':`No readings since ${format(last)}`;summary.classList.toggle('data-warning',!online);summary.hidden=online;}
 
