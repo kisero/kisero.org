@@ -1,6 +1,6 @@
 # Kisero.org
 
-A responsive sailing log for KISERO, a Beneteau First 27 SE sailing from Pula, Croatia. The site includes boat status, season summaries, a trip list, and detailed trip pages.
+A responsive sailing log for KISERO, a Beneteau First 27 SE sailing out of Puerto Banús, Spain. The site includes boat status, season summaries, a trip list, and detailed trip pages.
 
 ## Files
 
@@ -9,7 +9,9 @@ A responsive sailing log for KISERO, a Beneteau First 27 SE sailing from Pula, C
 - `logbook.html` — API-backed public exact-track logbook
 - `styles.css` — legacy responsive styling retained for reuse
 - `favicon.svg` — browser icon
-- `amplify.yml` — buildless AWS Amplify Hosting configuration
+- `amplify.yml` — AWS Amplify Hosting configuration
+- `assets/home-snapshot.js` — shared cache and browser fallback for the homepage
+- `scripts/refresh-home-seed.mjs` — refreshes the public fallback during an Amplify build
 - `site-deploy.zip` — `index.html`, `trip.html`, `styles.css`, and `favicon.svg`, retained for manual deployment or backup
 
 ## Publish with AWS Amplify Hosting
@@ -18,7 +20,7 @@ AWS Amplify is connected to this repository's `main` branch. Every push to `main
 
 Make and commit changes in your local clone, then push them to `main`. The Amplify GitHub App is scoped to `kisero/kisero.org` for this deployment.
 
-The `kisero.org`, `www.kisero.org`, and `test.kisero.org` hostnames are mapped to the `main` branch in the Git-connected app. Finish the domain's nameserver update at the registrar and wait for Amplify's managed certificate and domain status to become available before relying on the custom domain. The Amplify Hosting URL is available while DNS propagates.
+Production is [kisero.org](https://kisero.org/), served by the Git-connected Amplify app.
 
 ## Local preview
 
@@ -114,11 +116,17 @@ The motion timeline has the same custom tooltip styling as the cabin chart. Hove
 
 ## Homepage snapshot
 
-The homepage starts with the last public snapshot saved in the browser or
-bundled by Amplify. It refreshes that snapshot from `/v1/home` while visible.
-The shared cache is updated by the Pi's normal uploads. GPS and alarm
-status use the last confirmed values. The connection label switches to
-offline after 60 seconds without an AWS-received heartbeat and keeps the
-last update time visible. Cabin samples retain their five-minute cadence.
-The detailed cabin and motion histories load when their charts come into view.
-The private alarm controls still read conditions directly.
+The homepage renders the last confirmed cabin readings, boat state, alarm state,
+and sailing totals from a snapshot saved by the browser or bundled with the
+Amplify build. While the tab is visible, the browser checks the shared
+`GET /v1/home` cache every 15 seconds. This refreshes the display from data
+already stored in AWS. The detailed charts load when they come into view.
+
+During the initial check, an older saved snapshot shows the last confirmed
+contact time. Once the check settles, the site shows **Boat offline** after
+more than 60 seconds without an AWS-received Pi heartbeat. The last readings
+and contact time stay visible if a refresh fails. The Pi normally reports a
+heartbeat every 30 seconds and samples the cabin every five minutes.
+
+The private alarm page uses the live control API. See the
+[backend snapshot documentation](https://github.com/kisero/raspberry-pi-kisero/blob/main/ARCHITECTURE.md#homepage-snapshot).
