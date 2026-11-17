@@ -23,7 +23,7 @@ a{color:inherit}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
 <link rel="stylesheet" href="assets/site-ui.css?v=20261029-motion-tooltip">
-<script src="assets/translations.js?v=20261116-boat-label"></script>
+<script src="assets/translations.js?v=20261117-snapshot"></script>
 <script src="assets/i18n.js?v=20261029-motion-tooltip"></script>
 </head>
 <body>
@@ -155,7 +155,9 @@ a{color:inherit}
 
   <footer class="footer site-footer"><div class="site-footer-row"><span class="footer-note">NMEA 2000 data obtained using <a href="https://www.yachtd.com/" target="_blank" rel="noopener noreferrer">YachtDevice</a></span><div class="project-links"><span>Project hosted at GitHub</span><a href="https://github.com/kisero/kisero.org" target="_blank" rel="noopener noreferrer">Website</a><a href="https://github.com/kisero/raspberry-pi-kisero" target="_blank" rel="noopener noreferrer">Raspberry Pi system</a></div><nav class="language-flags" aria-label="Language"><button type="button" data-language="en" lang="en" title="English" aria-label="English"><span aria-hidden="true">🇬🇧</span></button><button type="button" data-language="es" lang="es" title="Español" aria-label="Español"><span aria-hidden="true">🇪🇸</span></button><button type="button" data-language="hr" lang="hr" title="Hrvatski" aria-label="Hrvatski"><span aria-hidden="true">🇭🇷</span></button><button type="button" data-language="sk" lang="sk" title="Slovenčina" aria-label="Slovenčina"><span aria-hidden="true">🇸🇰</span></button></nav></div></footer>
 </div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="assets/home-seed.js"></script>
+<script src="assets/home-snapshot.js?v=1"></script>
 <script src="assets/sailing-stats.js"></script>
 <script src="assets/chart-range.js?v=20261116-history"></script>
 <script>
@@ -237,72 +239,42 @@ a{color:inherit}
     sensorSvg.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End','Escape'].includes(event.key)){event.preventDefault();if(event.key==='Escape')hide();else show(event.key==='Home'?0:event.key==='End'?recent.length-1:selected+(event.key==='ArrowLeft'?-1:1));}};
 
   }
+  function showCabin(sample){
+    if(!sample||latestSensorAt&&Date.parse(sample.observedAt)<Date.parse(latestSensorAt))return;
+    document.getElementById('cabin-temperature').textContent=`${Number(sample.temperatureC).toFixed(1)} °C`;
+    document.getElementById('cabin-humidity').textContent=`${Number(sample.humidityPct).toFixed(1)} %`;
+    latestSensorAt=sample.observedAt;
+    sensorHealth();
+  }
   async function refreshSensorReadings(){
     try{
-      const response=await fetch(`${API}/v1/sensors`,{cache:'no-store'});
-      if(!response.ok)throw new Error(`Sensor feed returned ${response.status}`);
-      const payload=await response.json(),samples=Array.isArray(payload.samples)?payload.samples.filter(sample=>Number.isFinite(Number(sample.temperatureC))&&Number.isFinite(Number(sample.humidityPct))):[];
-      cabinSamples=samples;
+      const response=await fetch(`${API}/v1/sensors`);
+      if(!response.ok)throw new Error();
+      const payload=await response.json();
+      cabinSamples=(payload.samples||[]).filter(sample=>Number.isFinite(Number(sample.temperatureC))&&Number.isFinite(Number(sample.humidityPct)));
+      sensorFeedFailed=false;
       drawSensorChart(cabinSamples);
-      if(!samples.length){
-        document.getElementById('cabin-temperature').textContent='— °C';document.getElementById('cabin-humidity').textContent='— %';
-
-        latestSensorAt=null;sensorFeedFailed=false;sensorHealth();return;
-      }
-      const latest=samples.reduce((newest,sample)=>Date.parse(sample.observedAt)>Date.parse(newest.observedAt)?sample:newest,samples[0]);
-      document.getElementById('cabin-temperature').textContent=`${Number(latest.temperatureC).toFixed(1)} °C`;document.getElementById('cabin-humidity').textContent=`${Number(latest.humidityPct).toFixed(1)} %`;
-      latestSensorAt=latest.observedAt;sensorFeedFailed=false;
-      sensorHealth();
-    }catch(error){
-      sensorFeedFailed=true;sensorHealth();
+    }catch{
+      sensorFeedFailed=true;
     }
+    sensorHealth();
   }
   window.addEventListener('kisero-chart-range',()=>{drawSensorChart(cabinSamples);sensorHealth();});
-  refreshSensorReadings();setInterval(refreshSensorReadings,300000);
+  KiseroHome.whenVisible(sensorSvg,()=>{
+    refreshSensorReadings();
+    setInterval(refreshSensorReadings,300000);
+  });
   const rows=document.getElementById('trip-rows');
   const status=document.getElementById('latest-status');
-  const positionCacheKey='kisero-last-known-boat-position';
-  const freshPositionMs=120000,lastKnownPositionMs=86400000;
-  let lastKnownPosition=null,positionRequestPending=false;
-  const validPosition=position=>position&&['sailing','moored'].includes(position.state)&&Number.isFinite(position.observedAt);
-  const positionAge=position=>Date.now()-position.observedAt*1000;
-  const setPositionLabel=(empty='Awaiting GPS')=>{
-    let label=empty;
-    if(lastKnownPosition&&positionAge(lastKnownPosition)<lastKnownPositionMs){
-      const {state,location}=lastKnownPosition;
-      label=state==='sailing'?`Sailing (${location||'At sea'})`:`Moored (${location||'Location unknown'})`;
-    }
+  KiseroHome.subscribe(({position,cabin})=>{
+    showCabin(cabin);
+    const label=!position?'Awaiting GPS':position.state==='sailing'
+      ?`Sailing (${position.location||'At sea'})`:`Moored (${position.location||'Location unknown'})`;
     if(status.dataset.source!==label){
       status.dataset.source=label;
       status.textContent=label;
     }
-  };
-  try{
-    const saved=JSON.parse(localStorage.getItem(positionCacheKey));
-    if(validPosition(saved)){
-      lastKnownPosition=saved;
-      setPositionLabel('Checking boat position…');
-    }
-  }catch{}
-  async function refreshBoatPosition(){
-    if(document.hidden||positionRequestPending)return;
-    positionRequestPending=true;
-    try{
-      const response=await fetch(`${API}/v1/alarm/boat`,{cache:'no-store',signal:AbortSignal.timeout(8000)});
-      if(!response.ok)throw new Error();
-      const boat=await response.json();
-      if(validPosition(boat)&&positionAge(boat)<freshPositionMs){
-        lastKnownPosition={state:boat.state,location:typeof boat.location==='string'?boat.location:null,observedAt:boat.observedAt};
-        try{localStorage.setItem(positionCacheKey,JSON.stringify(lastKnownPosition));}catch{}
-      }
-    }catch{}finally{
-      positionRequestPending=false;
-      setPositionLabel();
-    }
-  }
-  refreshBoatPosition();
-  setInterval(refreshBoatPosition,30000);
-  document.addEventListener('visibilitychange',refreshBoatPosition);
+  });
   let boatPosition=null, map=null, boatMarker=null;
   const fmtDate=value=>{const [day,time=""]=value.split('T');return new Date(`${day}T00:00:00Z`).toLocaleDateString(window.KiseroI18n.locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})+(time?` · ${time.slice(0,5)}`:'')};
   const duration=(start,end)=>{const a=new Date(`${start}Z`),b=new Date(`${end}Z`),mins=Math.max(0,Math.round((b-a)/60000));return `${Math.floor(mins/60)} h ${String(mins%60).padStart(2,'0')} m`};
@@ -319,21 +291,44 @@ a{color:inherit}
     if(directions.length){const sin=directions.reduce((sum,value)=>sum+Math.sin(value),0),cos=directions.reduce((sum,value)=>sum+Math.cos(value),0);bearing=(Math.atan2(sin,cos)*180/Math.PI+360)%360;}
     return {speed:speed.length?`${(speed.reduce((sum,value)=>sum+value,0)/speed.length).toFixed(1)} / ${Math.max(...speed).toFixed(1)} kn`:'— / — kn',bearing};
   };
-  fetch(`${API}/v1/trips`).then(response=>{if(!response.ok)throw new Error('Trip data is temporarily unavailable.');return response.json()}).then(async payload=>{
-    const trips=payload.trips||[];
+  let displayedTrips='',tripRender=0;
+  async function showTrips({trips}){
+    const signature=JSON.stringify(trips);
+    if(signature===displayedTrips)return;
+    displayedTrips=signature;
+    const renderID=++tripRender;
     if(!trips.length){rows.innerHTML='<tr><td colspan="7" style="padding:16px;color:#6B7280">No sailing sessions recorded yet.</td></tr>';return;}
     const latest=trips[0];
+    const oldRows=new Map(Array.from(rows.querySelectorAll('[data-trip-id]'),row=>[row.dataset.tripId,row]));
+    rows.replaceChildren(...trips.map(trip=>{
+      if(oldRows.has(trip.id))return oldRows.get(trip.id);
+      const row=document.createElement('tr');
+      row.dataset.tripId=trip.id;
+      row.append(cell(fmtDate(trip.start)));
+      const route=cell('');
+      const link=document.createElement('a');
+      link.href=`logbook.html?id=${encodeURIComponent(trip.id)}`;
+      link.textContent='Open exact GPS track';
+      route.append(link);
+      row.append(route,cell(`${Number(trip.distanceNm).toFixed(2)} nm`),
+        cell(duration(trip.start,trip.end)),cell(`${Number(trip.averageSogKn).toFixed(1)} / — / ${Number(trip.maxSogKn).toFixed(1)} kn`),cell('—'),cell('—'));
+      return row;
+    }));
     document.getElementById('season-distance').textContent=`${trips.reduce((sum,trip)=>sum+Number(trip.distanceNm||0),0).toFixed(1)} nm`;
     const underwayMinutes=trips.reduce((sum,trip)=>sum+Math.max(0,Math.round((new Date(`${trip.end}Z`)-new Date(`${trip.start}Z`))/60000)),0);document.getElementById('season-duration').textContent=`${Math.floor(underwayMinutes/60)} h ${String(underwayMinutes%60).padStart(2,'0')} m`;
     document.getElementById('season-trips').textContent=String(trips.length);
     document.getElementById('season-speed').textContent=`${Math.max(...trips.map(trip=>Number(trip.maxSogKn||0))).toFixed(1)} kn`;
-    const sensorResponse=await fetch('assets/sensor-readings.json');
-    const sensorData=sensorResponse.ok?await sensorResponse.json():{readings:{}};
-    const placesResponse=await fetch('assets/known-places.json');
-    const knownPlaces=placesResponse.ok?await placesResponse.json():{places:[]};
+    const readAsset=async path=>{
+      try{const response=await fetch(path);return response.ok?await response.json():{};}
+      catch{return {};}
+    };
+    const [sensorData,knownPlaces]=await Promise.all([
+      readAsset('assets/sensor-readings.json'),readAsset('assets/known-places.json')
+    ]);
     const detailsById=new Map(await Promise.all(trips.map(async trip=>{
       try{const response=await fetch(`${API}/v1/trips/${encodeURIComponent(trip.id)}`);return [trip.id,response.ok?await response.json():null];}catch{return [trip.id,null];}
     })));
+    if(renderID!==tripRender)return;
     rows.replaceChildren();
     for(const trip of trips){
       const track=detailsById.get(trip.id)?.track||[];
@@ -341,6 +336,7 @@ a{color:inherit}
       const tripUrl=`logbook.html?id=${encodeURIComponent(trip.id)}`;
       const tr=document.createElement('tr');
       tr.className='trip-row';
+      tr.dataset.tripId=trip.id;
       tr.addEventListener('click',event=>{
         if(event.target.closest('a,button,input,select,textarea')||window.getSelection()?.toString())return;
         if(event.ctrlKey||event.metaKey)window.open(tripUrl,'_blank','noopener');
@@ -372,11 +368,12 @@ a{color:inherit}
       rows.append(tr);
     }
     const latestTrack=detailsById.get(latest.id)?.track,point=latestTrack?.at(-1);if(point){const lat=Number(point[1]),lon=Number(point[0]);boatPosition=[lat,lon];document.getElementById('boat-coordinates').textContent=`${Math.abs(lat).toFixed(4)}° ${lat>=0?'N':'S'}, ${Math.abs(lon).toFixed(4)}° ${lon>=0?'E':'W'}`;document.querySelector('.locate-sample').textContent='Last recorded GPS position';document.getElementById('boat-speed').textContent=`${Number(point[3]).toFixed(1)} kn`;if(map&&boatMarker){boatMarker.setLatLng(boatPosition);map.setView(boatPosition,13);}}
-  }).catch(error=>{rows.innerHTML='<tr><td colspan="7" style="padding:16px;color:#8A5300">Trip summaries could not be loaded. Try the sailing log again shortly.</td></tr>';});
+  }
+  KiseroHome.subscribe(showTrips);
   const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Last recorded GPS position').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
 </script>
-<script src="assets/connectivity.js?v=20261116-history" defer></script>
-<script src="assets/alarm.js?v=20261116-history" defer></script>
+<script src="assets/connectivity.js?v=20261117-snapshot" defer></script>
+<script src="assets/alarm.js?v=20261117-snapshot" defer></script>
 </body>
 </html>

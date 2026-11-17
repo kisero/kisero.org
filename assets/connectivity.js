@@ -3,7 +3,7 @@
   'use strict';
   const svg=document.getElementById('internet-chart');
   if(!svg)return;
-  let beats=[],started=null,grace=90000,serverTime=null,history=null;
+  let beats=[],started=null,grace=90000,serverTime=null,history=null,lastContact=null;
   const NS='http://www.w3.org/2000/svg';
   const format=t=>new Date(t).toLocaleString(window.KiseroI18n.locale,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
   function render(){
@@ -33,13 +33,19 @@
       for(const [a,b]of merged)rect(a,b,'#32834d',`Contact confirmed: ${format(a)} – ${format(b)}`);
     }
     for(let i=0;i<=4;i++){const t=start+i*span/4;add('text',{x:left+(right-left)*i/4,y:91,'text-anchor':i===0?'start':i===4?'end':'middle'},KiseroChartRange.tick(t));}
-    const last=beats.at(-1),online=sourceFresh&&last!==undefined&&end-last<grace;
+    const latest=Math.max(lastContact??0,beats.at(-1)??0);
+    const last=latest||undefined,online=last!==undefined&&Date.now()-last<=60000;
     const header=document.getElementById('cabin-sensor-status');
-    if(header){header.textContent=last===undefined?'Waiting for Pi contact':`${online?'Boat connected':'Boat connection unavailable'} · Last update ${format(last)}`;header.classList.toggle('connection-warning',!online);}
+    if(header){header.textContent=last===undefined?'Waiting for Pi contact':`${online?'Boat connected':'Boat offline'} · Last update ${format(last)}`;header.classList.toggle('connection-warning',!online);}
     const summary=document.getElementById('internet-summary');
     if(summary){summary.textContent=online?'':last===undefined?'Waiting for Pi contact':`No readings since ${format(last)}`;summary.classList.toggle('data-warning',!online);summary.hidden=online;}
 
   }
+  window.KiseroHome?.subscribe(({device})=>{
+    const received=Date.parse(device?.receivedAt);
+    if(Number.isFinite(received))lastContact=Math.max(lastContact??0,received);
+    render();
+  });
   window.addEventListener('kisero-alarm-update',event=>{
     const packet=event.detail||{};
     if(packet.serverTime&&Number.isFinite(Date.parse(packet.serverTime)))serverTime=Date.parse(packet.serverTime);
@@ -51,5 +57,5 @@
   window.addEventListener('kisero-chart-history',event=>{history=event.detail;render();});
   window.addEventListener('resize',render);
   window.addEventListener('offline',render);window.addEventListener('online',render);
-  setInterval(render,15000);render();
+  setInterval(render,5000);render();
 })();

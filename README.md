@@ -14,7 +14,7 @@ A responsive sailing log for KISERO, a Beneteau First 27 SE sailing from Pula, C
 
 ## Publish with AWS Amplify Hosting
 
-AWS Amplify is connected to this repository's `main` branch. Every push to `main` starts a build and deploys the site automatically. The site is plain HTML and CSS, so Amplify publishes the repository root without a build command; these settings are in `amplify.yml`.
+AWS Amplify is connected to this repository's `main` branch. Every push to `main` starts a build and deploys the site automatically. Amplify refreshes the bundled public homepage snapshot at build time and publishes the repository root. These settings are in `amplify.yml`.
 
 Make and commit changes in your local clone, then push them to `main`. The Amplify GitHub App is scoped to `kisero/kisero.org` for this deployment.
 
@@ -28,8 +28,8 @@ Open `index.html` directly in a browser. The page has no build-time dependencies
 
 The hero's Alarm badge links to the live movement chart at `/#motion`.
 `assets/alarm.js` loads the last 24 hours of actual events and subscribes to the
-read-only AWS WebSocket feed. Reconnects refresh the snapshot; an offline Pi is
-identified after 90 seconds without a heartbeat. The public motion timeline and recent activity list only show events recorded while armed; disarming closes any active movement segment and leaves subsequent time gray. Raw sensor events remain archived. Displayed on/off state is the
+read-only AWS WebSocket feed. Reconnects refresh the chart history. The homepage
+marks the boat offline after 60 seconds without a heartbeat. The public motion timeline and recent activity list only show events recorded while armed; disarming closes any active movement segment and leaves subsequent time gray. Raw sensor events remain archived. Displayed on/off state is the
 Pi's last confirmed setting; requested changes are shown as pending until applied.
 
 `alarm.html` is unlinked and noindex. Its URL fragment must contain the private
@@ -82,14 +82,8 @@ The two status cards use the same desktop grid height so their bottom edges alig
 The hero removes live wind and sea-temperature tiles. A compact right-aligned temperature/humidity badge sits immediately before the
 moored and alarm badges and links to the cabin chart. The sensor freshness
 report sits directly below all three badges, grouped together at the bottom right of the hero and links to the internet timeline. The boat name and description align to the upper left; smaller screens stack the identity above the telemetry. Its right-side boat button shows only
-`Moored (location)` or `Sailing (location)` and opens the location map. The current
-state is explicitly configured in `assets/boat-status.json` as moored at Puerto
-Banús; it is not inferred from an old sailing session. Automatic live state
-changes require connecting the GPS publisher. The button's tooltip identifies
-this limitation, and the map uses the last GPS endpoint rather than the start of
-an old trip. Future boat status changes should update this source or replace it
-with an authenticated GPS feed.
-
+`Moored (location)` or `Sailing (location)` and opens the location map. The button uses the latest coarse GPS state from the public homepage
+snapshot. The map uses the last recorded public trip endpoint.
 
 ## Internet timeline and compact telemetry
 
@@ -109,8 +103,22 @@ paragraphs were removed from the visible page; timestamps remain in tooltips
 and the raw API data. Sensor sample age and internet reachability are separate.
 
 ## Status freshness
-The hero reports the latest authenticated Pi heartbeat received by AWS, independently of sensor readings. Internet and alarm status become stale after 90 seconds; cabin readings warn in red after ten minutes (two expected cycles), with their last observation time. Sensor and heartbeat data refresh independently. The boat label uses the configured berth until a live GPS publisher is connected; its position warning is hidden for now. Connectivity never refreshes a position timestamp.
+The hero uses the latest authenticated Pi heartbeat received by AWS. Historical
+connectivity intervals use the timeline's existing 90-second grace period.
+Cabin readings warn in red after ten minutes with their last observation time.
+Connectivity never changes the observation time of a position or cabin reading.
 
 The pages opt out of browser machine translation (`google=notranslate` and the `notranslate` root class). The site's flag selector owns the displayed language, including asynchronous readings; browser translation otherwise rewrites only parts of an already translated page back into the browser's preferred language. This class does not disable the site's own translation engine.
 
 The motion timeline has the same custom tooltip styling as the cabin chart. Hover or tap anywhere for the local date/time and recorded activity; movement segments show their start/end, and siren markers show the exact trigger timestamp. Gray periods say no recorded alarm activity rather than claiming the sensor detected no movement. Keyboard focus supports five-minute left/right steps, Home/End and Escape.
+
+## Homepage snapshot
+
+The homepage starts with the last public snapshot saved in the browser or
+bundled by Amplify. It refreshes that snapshot from `/v1/home` while visible.
+The shared cache is updated by the Pi's normal uploads. GPS and alarm
+status use the last confirmed values. The connection label switches to
+offline after 60 seconds without an AWS-received heartbeat and keeps the
+last update time visible. Cabin samples retain their five-minute cadence.
+The detailed cabin and motion histories load when their charts come into view.
+The private alarm controls still read conditions directly.

@@ -22,13 +22,18 @@ function merge(packet){
  if(packet.events)events=Array.from(new Map([...events,...packet.events].map(e=>[e.id,e])).values());
  if(packet.event&&!events.some(e=>e.id===packet.event.id))events.push(packet.event);
  events=events.filter(e=>Date.parse(e.observedAt)>Date.now()-86400000).sort((a,b)=>a.observedAt.localeCompare(b.observedAt)).slice(-500);
+ const previous=model?.device;
+ const device=packet.device;
+ if(previous&&(!device||Date.parse(previous.receivedAt)>Date.parse(device.receivedAt))){
+  packet={...packet,device:previous};
+ }
  model={...model,...packet};render();
  window.dispatchEvent(new CustomEvent('kisero-alarm-update',{detail:packet}));
 }
 function render(){
  if(!model)return;
- const d=model.device,c=model.control||{},fresh=d&&Date.now()-Date.parse(d.reportedAt)<90000;
- const pending=!d||d.controlVersion!==c.version;
+ const d=model.device,c=model.control||{},fresh=d&&Date.now()-Date.parse(d.receivedAt||d.reportedAt)<=(admin?90000:60000);
+ const pending=!d||(c.version!=null&&d.controlVersion!==c.version);
  const delay=d?.armingUntil&&Date.parse(d.armingUntil)>Date.now();
  const state=d?(d.armed?'On':'Off'):'Unknown';
  let detail=!fresh?'Pi offline':pending?'Applying change…':!d.armed?'Alarm (Off)':!d.ready?'Sensor warming up':delay?'Exit delay':d.sounding?'Motion alarm sounding':d.motion?'Movement detected':'No movement';
@@ -197,9 +202,20 @@ if(admin){
   finally{saving=false;enableControls();}
  }));
 }
-snapshot();
-setInterval(()=>{render();if(socket?.readyState===1)socket.send('{"action":"ping"}');if(socket?.readyState!==1||Date.now()-lastPacket>75000)snapshot();},15000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)snapshot();});
-window.addEventListener('pageshow',event=>{if(event.persisted){closed=false;socket=null;snapshot();}});
+let chartStarted=false;
+function startHistory(){
+ if(chartStarted)return;
+ chartStarted=true;
+ snapshot();
+}
+if(admin||!window.KiseroHome)startHistory();
+else {
+ KiseroHome.subscribe(({device})=>{if(device)merge({device});});
+ KiseroHome.whenVisible($('motion-chart'),startHistory);
+ KiseroHome.whenVisible($('internet-chart'),startHistory);
+}
+setInterval(()=>{render();if(!chartStarted)return;if(socket?.readyState===1)socket.send('{"action":"ping"}');if(socket?.readyState!==1||Date.now()-lastPacket>75000)snapshot();},15000);
+document.addEventListener('visibilitychange',()=>{if(chartStarted&&!document.hidden)snapshot();});
+window.addEventListener('pageshow',event=>{if(event.persisted){closed=false;socket=null;if(chartStarted)snapshot();}});
 window.addEventListener('pagehide',()=>{closed=true;socket?.close();clearTimeout(reconnect);});
 })();
