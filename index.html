@@ -23,7 +23,7 @@ a{color:inherit}
 </style>
 <link rel="stylesheet" href="assets/alarm.css">
 <link rel="stylesheet" href="assets/site-ui.css?v=20261029-motion-tooltip">
-<script src="assets/translations.js?v=20261117-snapshot2"></script>
+<script src="assets/translations.js?v=20261118-last-update"></script>
 <script src="assets/i18n.js?v=20261029-motion-tooltip"></script>
 </head>
 <body>
@@ -373,7 +373,7 @@ a{color:inherit}
   const dialog=document.getElementById('locate-dialog'),openButton=document.getElementById('locate-open'),closeButton=dialog.querySelector('.locate-close');openButton.addEventListener('click',()=>{dialog.showModal();if(!window.L)return;if(!boatPosition){document.getElementById('locate-map').textContent='No recorded GPS position is available yet.';return;}if(!map){map=L.map('locate-map',{scrollWheelZoom:false}).setView(boatPosition,13);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}).addTo(map);boatMarker=L.marker(boatPosition).addTo(map).bindPopup('Last recorded GPS position').openPopup();}requestAnimationFrame(()=>map.invalidateSize())});closeButton.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 })();
 </script>
-<script src="assets/connectivity.js?v=20261117-snapshot2" defer></script>
+<script src="assets/connectivity.js?v=20261118-last-update" defer></script>
 <script src="assets/alarm.js?v=20261117-snapshot" defer></script>
 </body>
 </html>

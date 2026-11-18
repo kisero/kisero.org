@@ -6,6 +6,17 @@
   let beats=[],started=null,grace=90000,serverTime=null,history=null,lastContact=null;
   const NS='http://www.w3.org/2000/svg';
   const format=t=>new Date(t).toLocaleString(window.KiseroI18n.locale,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  function formatLastUpdate(timestamp){
+    const locale=window.KiseroI18n.locale;
+    const date=new Date(timestamp);
+    const options={day:'numeric',month:'long',hour:'numeric',minute:'2-digit'};
+    if(!locale.startsWith('en'))return date.toLocaleString(locale,options);
+    const fields=Object.fromEntries(new Intl.DateTimeFormat(locale,{...options,hour12:true})
+      .formatToParts(date).filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
+    const day=Number(fields.day);
+    const suffix=day>=11&&day<=13?'th':({1:'st',2:'nd',3:'rd'}[day%10]||'th');
+    return `${day}${suffix} ${fields.month} ${fields.hour}:${fields.minute}${fields.dayPeriod.toUpperCase()}`;
+  }
   function render(){
     const {start,end,days}=KiseroChartRange.window(),span=Math.max(1,end-start),width=Math.max(320,svg.clientWidth),left=16,right=width-16;
     svg.setAttribute('viewBox',`0 0 ${width} 108`);svg.replaceChildren();
@@ -35,14 +46,8 @@
     for(let i=0;i<=4;i++){const t=start+i*span/4;add('text',{x:left+(right-left)*i/4,y:91,'text-anchor':i===0?'start':i===4?'end':'middle'},KiseroChartRange.tick(t));}
     const latest=Math.max(lastContact??0,beats.at(-1)??0);
     const last=latest||undefined,online=last!==undefined&&Date.now()-last<=60000;
-    const checking=window.KiseroHome?.checkingFirstSnapshot();
     const header=document.getElementById('cabin-sensor-status');
-    if(header){
-      header.textContent=last===undefined?'Waiting for Pi contact':checking&&!online
-        ?`Last confirmed contact ${format(last)}`
-        :`${online?'Boat connected':'Boat offline'} · Last update ${format(last)}`;
-      header.classList.toggle('connection-warning',!online&&!checking);
-    }
+    if(header)header.textContent=last===undefined?'Waiting for Pi contact':`Last update ${formatLastUpdate(last)}`;
     const summary=document.getElementById('internet-summary');
     if(summary){summary.textContent=online?'':last===undefined?'Waiting for Pi contact':`No readings since ${format(last)}`;summary.classList.toggle('data-warning',!online);summary.hidden=online;}
 
@@ -57,7 +62,12 @@
     if(packet.serverTime&&Number.isFinite(Date.parse(packet.serverTime)))serverTime=Date.parse(packet.serverTime);
     if(packet.connectivity){const history=packet.connectivity;if(history.startedAt)started=Date.parse(history.startedAt);if(Number.isFinite(history.graceSeconds))grace=history.graceSeconds*1000;beats.push(...(history.beats||[]).map(Date.parse).filter(Number.isFinite));}
     if(packet.connectivityStartedAt)started=Date.parse(packet.connectivityStartedAt);
-    for(const value of [packet.connectivityBeat,packet.device?.receivedAt]){if(value&&Number.isFinite(Date.parse(value)))beats.push(Date.parse(value));}
+    for(const value of [packet.connectivityBeat,packet.device?.receivedAt]){
+      const received=Date.parse(value);
+      if(!Number.isFinite(received))continue;
+      lastContact=Math.max(lastContact??0,received);
+      beats.push(received);
+    }
     beats=[...new Set(beats)];render();
   });
   window.addEventListener('kisero-chart-history',event=>{history=event.detail;render();});

@@ -30,8 +30,7 @@ Open `index.html` directly in a browser. The page has no build-time dependencies
 
 The hero's Alarm badge links to the live movement chart at `/#motion`.
 `assets/alarm.js` loads the last 24 hours of actual events and subscribes to the
-read-only AWS WebSocket feed. Reconnects refresh the chart history. The homepage
-marks the boat offline after 60 seconds without a heartbeat. The public motion timeline and recent activity list only show events recorded while armed; disarming closes any active movement segment and leaves subsequent time gray. Raw sensor events remain archived. Displayed on/off state is the
+read-only AWS WebSocket feed. Reconnects refresh the chart history. The homepage shows the last confirmed Pi update time. The public motion timeline and recent activity list only show events recorded while armed; disarming closes any active movement segment and leaves subsequent time gray. Raw sensor events remain archived. Displayed on/off state is the
 Pi's last confirmed setting; requested changes are shown as pending until applied.
 
 `alarm.html` is unlinked and noindex. Its URL fragment must contain the private
@@ -122,11 +121,11 @@ Amplify build. While the tab is visible, the browser checks the shared
 `GET /v1/home` cache every 15 seconds. This refreshes the display from data
 already stored in AWS. The detailed charts load when they come into view.
 
-During the initial check, an older saved snapshot shows the last confirmed
-contact time. Once the check settles, the site shows **Boat offline** after
-more than 60 seconds without an AWS-received Pi heartbeat. The last readings
-and contact time stay visible if a refresh fails. The Pi normally reports a
-heartbeat every 30 seconds and samples the cabin every five minutes.
+The homepage label shows the most recent Pi heartbeat timestamp received by
+AWS, in the visitor's local time. The last readings and update time stay visible
+if a refresh fails, and the label advances when a newer heartbeat arrives. The
+Pi normally reports a heartbeat every 30 seconds and samples the cabin every
+five minutes.
 
 The private alarm page uses the live control API. See the
 [backend snapshot documentation](https://github.com/kisero/raspberry-pi-kisero/blob/main/ARCHITECTURE.md#homepage-snapshot).
