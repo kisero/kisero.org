@@ -208,7 +208,13 @@ a{color:inherit}
       }
       sensorSvg.append(svgNode('path',{class:style,d:path}));
     }
-    const dots=recent.length>700?recent.filter((_,i)=>i===recent.length-1||i%Math.ceil(recent.length/700)===0):recent;
+    // Dense markers obscure the lines. Keep isolated readings visible across gaps.
+    const dots=recent.length<=80?recent:recent.filter((sample,index)=>{
+      const time=Date.parse(sample.observedAt);
+      const before=recent[index-1],after=recent[index+1];
+      return (!before||time-Date.parse(before.observedAt)>15*60000)
+        &&(!after||Date.parse(after.observedAt)-time>15*60000);
+    });
     for(const sample of dots){
       const time=sensorTime(sample.observedAt),temperature=Number(sample.temperatureC),humidity=Number(sample.humidityPct);
       const tempDot=svgNode('circle',{class:'temp-dot',cx:xFor(sample),cy:yFor(temperature,tMin,tMax),r:recent.length>80?2.2:4});

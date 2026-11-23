@@ -72,7 +72,9 @@ The cabin chart supports pointer hover, touch and keyboard focus. Each position
 selects the closest actual sample by timestamp and shows its date/time,
 temperature and humidity, with a vertical guide and markers on both series.
 Left/right arrows move between samples; Home/End select the first/last, Escape
-hides the tooltip. It uses original samples, not interpolated measurements.
+hides the tooltip. It uses original samples, not interpolated measurements. Dense views show continuous lines with markers only for isolated
+readings and the selected hover point. This keeps the weekly and monthly
+trends legible while preserving recorded gaps.
 
 The footer uses four flag buttons with accessible language names instead of a
 select menu. Its GitHub text and links are 14px and share one desktop row with
